@@ -1,0 +1,102 @@
+import os
+import ccxt
+from dotenv import load_dotenv
+import requests
+
+load_dotenv()
+
+TOKEN   = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+def enviar_telegram(mensaje):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    requests.post(url, data={"chat_id": CHAT_ID, "text": mensaje, "parse_mode": "HTML"})
+
+def get_exchange():
+    return ccxt.binance({
+        'apiKey': os.getenv("BINANCE_API_KEY"),
+        'secret': os.getenv("BINANCE_SECRET_KEY"),
+        'enableRateLimit': True,
+    })
+
+def saldo_disponible(exchange, moneda='USDC'):
+    balance = exchange.fetch_balance()
+    return balance['free'].get(moneda, 0)
+
+def posicion_abierta(exchange, simbolo):
+    """Verifica si hay una orden OCO activa en el activo."""
+    try:
+        ordenes = exchange.fetch_open_orders(simbolo)
+        return len(ordenes) > 0
+    except:
+        return False
+
+def ejecutar_compra(simbolo, señal):
+    """Ejecuta compra y coloca OCO automáticamente."""
+    exchange = get_exchange()
+
+    # Verificar posición abierta
+    if posicion_abierta(exchange, simbolo):
+        print(f"⚠️  {simbolo}: posición ya abierta — señal ignorada")
+        return False
+
+    # Calcular capital
+    saldo = saldo_disponible(exchange, 'USDT')
+    kelly_pct = min(señal['kelly'] / 4 / 100, 0.10)
+    capital_usdt = round(saldo * kelly_pct, 2)
+
+    if capital_usdt < 5:
+        return False
+
+    precio = señal['precio']
+    cantidad = round(capital_usdt / precio, 4)
+
+    stop_precio  = round(precio * (1 - señal['stop']/100), 4)
+    take_precio  = round(precio * (1 + señal['take']/100), 4)
+    stop_limit   = round(stop_precio * 0.998, 4)
+
+    try:
+        # Compra a mercado
+        orden_compra = exchange.create_market_buy_order(simbolo, cantidad)
+        precio_real  = orden_compra['average'] or precio
+        cantidad_real = orden_compra['filled']
+
+        print(f"✅ Compra ejecutada: {cantidad_real} {simbolo} a ${precio_real}")
+
+        # OCO automático
+        exchange.create_order(
+            simbolo, 'OCO', 'sell', cantidad_real,
+            take_precio,
+            {
+                'stopPrice': stop_precio,
+                'stopLimitPrice': stop_limit,
+                'stopLimitTimeInForce': 'GTC',
+            }
+        )
+
+        print(f"✅ OCO colocado: stop ${stop_precio} | take ${take_precio}")
+
+        msg = f"""<b>🤖 EJECUCIÓN AUTOMÁTICA</b>
+
+{simbolo}
+Compra: <b>${precio_real:.4f}</b>
+Cantidad: <b>{cantidad_real}</b>
+Capital: <b>${capital_usdt:.2f} USDT</b>
+
+Stop: ${stop_precio} ({señal['stop']:.0f}%)
+Take: ${take_precio} ({señal['take']:.0f}%)
+OCO: ✅ Colocado automáticamente"""
+
+        enviar_telegram(msg)
+        return True
+
+    except Exception as e:
+        print(f"❌ Error ejecutando orden: {e}")
+        enviar_telegram(f"❌ Error ejecución automática {simbolo}: {e}")
+        return False
+
+if __name__ == "__main__":
+    # Test de conexión
+    exchange = get_exchange()
+    saldo = saldo_disponible(exchange)
+    print(f"✅ Conexión OK — Saldo USDT: ${saldo:.2f}")
