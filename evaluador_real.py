@@ -87,7 +87,7 @@ Resultado: <b>{resultado}</b>""")
                 stop_actual   = stop
                 nuevo_stop    = round(precio_actual * 0.98, 4)  # 2% por debajo del precio actual
 
-                if nuevo_stop > stop_actual:
+                if nuevo_stop > stop_actual * 1.02:
                     # El precio subió suficiente — mover el stop
                     nuevo_stop_limit = round(nuevo_stop * 0.998, 4)
                     nuevo_take       = take  # take profit no cambia
