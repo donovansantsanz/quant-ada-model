@@ -45,42 +45,29 @@ def evaluar_operaciones():
             ordenes_abiertas = exchange.fetch_open_orders(simbolo)
 
             if len(ordenes_abiertas) == 0:
-                # No hay órdenes abiertas — el OCO se ejecutó
-                ticker = exchange.fetch_ticker(simbolo)
-                precio_actual = ticker['last']
+                # Consultar historial de órdenes ejecutadas
                 precio_entrada = float(fila['precio_entrada'])
                 stop = float(fila['stop_loss'])
                 take = float(fila['take_profit'])
-
-                # Determinar si fue stop o take
-                if precio_actual <= stop * 1.01:
+                try:
+                    historial = exchange.fetch_orders(simbolo, limit=10)
+                    ordenes_sell = [o for o in historial if o['side'] == 'sell' and o['status'] == 'closed']
+                    if ordenes_sell:
+                        ultima = sorted(ordenes_sell, key=lambda x: x['timestamp'])[-1]
+                        precio_cierre = float(ultima['average'] or ultima['price'])
+                    else:
+                        ticker = exchange.fetch_ticker(simbolo)
+                        precio_cierre = ticker['last']
+                except:
+                    ticker = exchange.fetch_ticker(simbolo)
+                    precio_cierre = ticker['last']
+                retorno = round((precio_cierre - precio_entrada) / precio_entrada * 100, 2)
+                if precio_cierre <= stop * 1.01:
                     resultado = 'stop_loss'
-                    precio_cierre = stop
-                    retorno = round((stop - precio_entrada) / precio_entrada * 100, 2)
-                elif precio_actual >= take * 0.99:
+                elif precio_cierre >= take * 0.99:
                     resultado = 'take_profit'
-                    precio_cierre = take
-                    retorno = round((take - precio_entrada) / precio_entrada * 100, 2)
                 else:
                     resultado = 'cerrado'
-                    precio_cierre = precio_actual
-                    retorno = round((precio_actual - precio_entrada) / precio_entrada * 100, 2)
-
-                df.at[idx, 'fecha_cierre']   = ahora.strftime('%Y-%m-%d %H:%M')
-                df.at[idx, 'precio_cierre']  = precio_cierre
-                df.at[idx, 'retorno_pct']    = retorno
-                df.at[idx, 'resultado']      = resultado
-
-                print(f"✅ {fila['activo']} cerrado — {resultado} | retorno: {retorno:.2f}%")
-
-                enviar_telegram(f"""<b>📊 Operación cerrada</b>
-
-{fila['activo']}
-Entrada: ${precio_entrada}
-Cierre: ${precio_cierre}
-Retorno: <b>{retorno:.2f}%</b>
-Resultado: <b>{resultado}</b>""")
-
                 actualizaciones += 1
 
         except Exception as e:
