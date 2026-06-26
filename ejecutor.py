@@ -40,6 +40,12 @@ def ejecutar_compra(simbolo, señal):
         return False
     kelly_pct    = min(señal['kelly'] / 4 / 100, 0.10)
     capital      = round(CAPITAL_BASE * kelly_pct, 2)
+    saldo        = saldo_disponible(exchange)
+    if saldo < 10:
+        print(f"⚠️ Saldo insuficiente: ${saldo:.2f} USDC — mínimo $10")
+        enviar_telegram(f"⚠️ Saldo insuficiente: ${saldo:.2f} USDC — operación cancelada")
+        return False
+    capital      = round(min(capital, saldo * 0.99), 2)
     precio       = señal['precio']
     cantidad     = round(capital / precio, 4)
     stop_precio  = round(precio * (1 - señal['stop']/100), 4)

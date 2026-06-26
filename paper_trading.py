@@ -17,7 +17,9 @@ ARCHIVO = "paper_trading_registro.csv"
 
 # ── CARGAR O CREAR REGISTRO ──────────────────────────────────────
 if os.path.exists(ARCHIVO):
-    registro = pd.read_csv(ARCHIVO)
+    registro = pd.read_csv(ARCHIVO, dtype={
+        'salida': 'object', 'acierto': 'object', 'evaluado': 'object'
+    })
 else:
     registro = pd.DataFrame(columns=[
         'fecha', 'activo', 'precio_entrada', 'decision',
@@ -25,6 +27,12 @@ else:
         'kelly', 'fecha_evaluacion', 'precio_evaluacion',
         'retorno_pct', 'salida', 'acierto', 'evaluado'
     ])
+    registro = registro.astype({
+        'precio_entrada': 'float64', 'rsi': 'float64',
+        'stop_loss': 'float64', 'take_profit': 'float64',
+        'precio_evaluacion': 'float64', 'retorno_pct': 'float64',
+        'salida': 'object', 'acierto': 'object', 'evaluado': 'object'
+    })
 
 
 # ── FILTRO BTC ───────────────────────────────────────────────────
@@ -66,11 +74,15 @@ for idx, fila in registro.iterrows():
             # Descargar velas desde entrada hasta hoy
             simbolo    = fila['activo']
             p_entrada  = float(fila['precio_entrada'])
-            stop       = float(fila['stop_loss'])
-            take       = float(fila['take_profit'])
+            stop       = float(fila['stop_loss']) / 100
+            take       = float(fila['take_profit']) / 100
 
-            velas = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=20)
+            from datetime import timezone
+            fecha_entrada_ts = int(pd.to_datetime(fila['fecha']).replace(tzinfo=timezone.utc).timestamp() * 1000)
+            fecha_eval_ts    = int(pd.to_datetime(fila['fecha_evaluacion']).replace(tzinfo=timezone.utc).timestamp() * 1000)
+            velas = exchange.fetch_ohlcv(simbolo, timeframe='1d', since=fecha_entrada_ts, limit=20)
             df_eval = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
+            df_eval = df_eval[df_eval['timestamp'] <= fecha_eval_ts]
 
             precio_stop = p_entrada * (1 - stop)
             precio_take = p_entrada * (1 + take)
@@ -119,7 +131,7 @@ for simbolo in PARAMS:
             'activo':            simbolo,
             'precio_entrada':    d['precio'],
             'decision':          d['decision'],
-            'score':             d['score'],
+            'score':             d['puntos'],
             'rsi':               d['rsi'],
             'prob_mc':           d['prob_mc'],
             'stop_loss':         d['stop'],
@@ -133,7 +145,7 @@ for simbolo in PARAMS:
             'evaluado':          False
         }
         registro = pd.concat([registro, pd.DataFrame([nueva_fila])], ignore_index=True)
-        print(f"   {simbolo}: {d['decision']} | Score: {d['score']} | RSI: {d['rsi']}")
+        print(f"   {simbolo}: {d['decision']} | Score: {d['puntos']} | RSI: {d['rsi']}")
 
 # ── GUARDAR ──────────────────────────────────────────────────────
 registro.to_csv(ARCHIVO, index=False)
