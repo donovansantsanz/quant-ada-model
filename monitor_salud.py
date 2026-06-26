@@ -82,8 +82,8 @@ def calcular_kelly_reciente(simbolo, umbral, stop, take, dias=90):
     kelly = (p * b - (1 - p)) / b * 100
     return round(kelly, 1), len(ganancias) + len(perdidas)
 
-from datetime import datetime
-print(f"Monitor de salud — {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}\n")
+from datetime import datetime, timezone
+print(f"Monitor de salud — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}\n")
 
 alertas = []
 resumen = []
