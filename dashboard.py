@@ -55,6 +55,47 @@ if CSV_4H.exists():
 else:
     print("  Sin datos")
 
+# ── OPERACIONES REALES ──
+separador("OPERACIONES REALES")
+import csv, os
+ARCHIVO_REAL = '/root/proyectos-quant/operaciones_reales.csv'
+if os.path.exists(ARCHIVO_REAL):
+    df_real = pd.read_csv(ARCHIVO_REAL)
+    abiertas = df_real[df_real['resultado'].isna() | (df_real['resultado'] == '')]
+    cerradas = df_real[df_real['resultado'].notna() & (df_real['resultado'] != '')]
+    print(f"  Operaciones abiertas: {len(abiertas)}")
+    for _, r in abiertas.iterrows():
+        print(f"  🔵 {r['activo']} | Entrada: ${r['precio_entrada']} | Stop: ${r['stop_loss']} | Take: ${r['take_profit']}")
+    print(f"  Operaciones cerradas: {len(cerradas)}")
+    if len(cerradas) > 0:
+        retorno_total = cerradas['retorno_pct'].astype(float).sum()
+        stops = (cerradas['resultado'] == 'stop_loss').sum()
+        takes = (cerradas['resultado'] == 'take_profit').sum()
+        print(f"  Stop loss: {stops} | Take profit: {takes} | Retorno acumulado: {retorno_total:.2f}%")
+else:
+    print("  Sin operaciones")
+
+# ── SALDO BINANCE ──
+separador("SALDO BINANCE")
+try:
+    import ccxt
+    from dotenv import load_dotenv
+    load_dotenv()
+    exchange = ccxt.binance({
+        'apiKey': os.getenv('BINANCE_API_KEY'),
+        'secret': os.getenv('BINANCE_SECRET_KEY'),
+        'enableRateLimit': True,
+        'options': {'defaultType': 'spot', 'fetchCurrencies': False},
+    })
+    balance = exchange.fetch_balance()
+    for moneda in ['USDC', 'BNB', 'ADA', 'SOL', 'ETH', 'BTC']:
+        libre = balance['free'].get(moneda, 0)
+        total = balance['total'].get(moneda, 0)
+        if total > 0:
+            print(f"  {moneda:<6} libre: {libre:.4f} | total: {total:.4f}")
+except Exception as e:
+    print(f"  Error conectando a Binance: {e}")
+
 # ── LOGS ──
 separador("ÚLTIMAS EJECUCIONES CRON")
 import subprocess
