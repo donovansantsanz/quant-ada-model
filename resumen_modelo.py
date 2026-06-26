@@ -113,27 +113,43 @@ for simbolo, p in PARAMS_OBS.items():
     filtro = "Activo" if p['filtro_btc'] else "Inactivo"
     print(f"  {simbolo:<12} {p['umbral']:>7} {filtro:>11}    pendiente")
 
-print("\n📁 SCRIPTS EN PRODUCCIÓN\n")
+print("\n SCRIPTS EN PRODUCCION\n")
 scripts = [
-    ("config.py",            "Fuente única de parámetros"),
-    ("monitor_v2.py",        "Monitor diario — alertas Telegram"),
-    ("paper_trading.py",     "Registro y evaluación de señales"),
-    ("evaluador.py",         "Resumen semanal automático"),
-    ("optimizador.py",       "Calibración de parámetros por activo"),
-    ("walk_forward.py",      "Validación out-of-sample"),
-    ("analisis_drawdown.py", "Análisis de drawdown y rachas"),
-    ("stress_test.py",       "Stress test histórico 2021-2026"),
-    ("resumen_modelo.py",    "Esta ficha técnica"),
+    ("config.py",              "Parametros sistema diario"),
+    ("config_4h.py",           "Parametros sistema 4h"),
+    ("monitor_v2.py",          "Monitor diario — alertas Telegram"),
+    ("monitor_4h.py",          "Monitor 4h — BNB/USDT"),
+    ("paper_trading.py",       "Paper trading diario"),
+    ("paper_trading_4h.py",    "Paper trading 4h"),
+    ("ejecutor.py",            "Ejecucion automatica — Binance API"),
+    ("evaluador_real.py",      "Cierre automatico + trailing stop"),
+    ("evaluador.py",           "Resumen semanal automatico"),
+    ("dashboard.py",           "Estado del sistema en tiempo real"),
+    ("watchdog.py",            "Monitoreo de salud del sistema"),
+    ("monitor_salud.py",       "Kelly rolling 90 dias por activo"),
+    ("walk_forward.py",        "Validacion out-of-sample diario"),
+    ("walk_forward_4h.py",     "Validacion out-of-sample 4h"),
+    ("optimizador.py",         "Calibracion de parametros"),
+    ("analisis_drawdown.py",   "Analisis de drawdown y rachas"),
+    ("stress_test.py",         "Stress test historico 2021-2026"),
+    ("resumen_modelo.py",      "Esta ficha tecnica"),
+    ("historial.py",           "Historial limpio de senales"),
+    ("historial_4h.py",        "Historial limpio senales 4h"),
 ]
 for nombre, desc in scripts:
-    print(f"  {nombre:<25} {desc}")
-
-print("\n⚙️  INFRAESTRUCTURA\n")
+    print(f"  {nombre:<27} {desc}")
+print("\n INFRAESTRUCTURA\n")
 print("  Servidor:   Hetzner CX22 — Ubuntu 24.04 — 24/7")
-print("  Cron:       10:30 UTC diario | Lunes 11:00 UTC resumen")
-print("  Exchange:   Binance via CCXT")
+print("  IP:         116.203.91.120")
+print("  Cron:       6 tareas activas")
+print("    10:30 UTC diario  — monitor_v2 + paper_trading")
+print("    */4h              — monitor_4h + paper_trading_4h")
+print("    */1h              — watchdog + evaluador_real")
+print("    Lunes 11:00 UTC   — evaluador (resumen semanal)")
+print("    Domingo 10:00 UTC — monitor_salud")
+print("  Exchange:   Binance (API key IP-restringida)")
+print("  Capital:    $1000 USDC base | Kelly/4 | max 10% por activo")
 print("  Alertas:    Telegram Bot API")
-
 print("\n" + "=" * 60)
 print("  github.com/donovansantsanz/quant-ada-model")
 print("=" * 60 + "\n")
