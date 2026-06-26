@@ -56,21 +56,32 @@ def ejecutar_compra(simbolo, señal):
         precio_real   = orden['average'] or precio
         cantidad_real = orden['filled']
         print(f"✅ Compra: {cantidad_real} {simbolo} a ${precio_real}")
-        exchange.create_order(
-            simbolo_usdc, 'OCO', 'sell', cantidad_real, take_precio,
-            {'stopPrice': stop_precio, 'stopLimitPrice': stop_limit, 'stopLimitTimeInForce': 'GTC'},
-        )
-        print(f"✅ OCO: stop ${stop_precio} | take ${take_precio}")
-        enviar_telegram(f"""<b>🤖 EJECUCIÓN AUTOMÁTICA</b>
-
+        try:
+            exchange.create_order(
+                simbolo_usdc, 'OCO', 'sell', cantidad_real, take_precio,
+                {'stopPrice': stop_precio, 'stopLimitPrice': stop_limit, 'stopLimitTimeInForce': 'GTC'},
+            )
+            print(f"OCO: stop ${stop_precio} | take ${take_precio}")
+            enviar_telegram(f"""<b>EJECUCION AUTOMATICA</b>
+{simbolo}
+Precio: <b>${precio_real:.4f}</b>
+Cantidad: <b>{cantidad_real}</b>
+Capital: <b>${capital:.2f}</b>
+Stop: ${stop_precio} | Take: ${take_precio}
+OCO colocado automaticamente""")
+        except Exception as oco_err:
+            print(f"OCO fallo: {oco_err}")
+            enviar_telegram(f"""<b>COMPRA EJECUTADA — OCO MANUAL</b>
 {simbolo}
 Precio: <b>${precio_real:.4f}</b>
 Cantidad: <b>{cantidad_real}</b>
 Capital: <b>${capital:.2f}</b>
 
-Stop: ${stop_precio} ({señal['stop']:.0f}%)
-Take: ${take_precio} ({señal['take']:.0f}%)
-✅ OCO colocado automáticamente""")
+Coloca esta OCO en Binance:
+Take profit: {take_precio}
+Stop trigger: {stop_precio}
+Stop limit: {stop_limit}
+Cantidad: {cantidad_real}""")
 
         # Registrar en operaciones_reales.csv
         import csv, os
