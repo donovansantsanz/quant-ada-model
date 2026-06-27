@@ -60,6 +60,7 @@ def evaluar_operaciones():
                     precio_cierre = exchange.fetch_ticker(simbolo)['last']
 
                 retorno = round((precio_cierre - precio_entrada) / precio_entrada * 100, 2)
+                pnl_usdc = round((precio_cierre - precio_entrada) * cantidad, 2)
                 if precio_cierre <= stop * 1.01:
                     resultado = 'stop_loss'
                 elif precio_cierre >= take * 0.99:
@@ -79,6 +80,7 @@ def evaluar_operaciones():
 Entrada: ${precio_entrada}
 Cierre: ${precio_cierre:.4f}
 Retorno: <b>{retorno:.2f}%</b>
+P&L: <b>${pnl_usdc:+.2f} USDC</b>
 Resultado: <b>{resultado}</b>""")
 
             else:
