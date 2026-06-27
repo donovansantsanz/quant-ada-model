@@ -101,6 +101,8 @@ Take profit: ${take}
 
 ⚠️ Mueve el stop manualmente en Binance""")
                     print(f"🔼 {simbolo_orig} alerta trailing stop: ${stop_actual} -> ${nuevo_stop}")
+                    df.at[idx, 'stop_loss'] = nuevo_stop
+                    actualizaciones += 1
 
                 else:
                     print(f"⏸ {simbolo_orig} trailing stop sin cambios | precio: ${precio_actual:.2f} | stop: ${stop_actual}")
