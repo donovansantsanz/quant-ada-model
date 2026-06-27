@@ -11,4 +11,5 @@ PARAMS = {
 # Activos en observación
 PARAMS_OBS = {
     'AVAX/USDT': {'umbral': 7, 'stop': 0.02, 'take': 0.10, 'filtro_btc': False},
+    'XRP/USDT': {'umbral': 6, 'stop': 0.03, 'take': 0.08, 'filtro_btc': False},
 }
