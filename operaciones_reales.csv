@@ -3,5 +3,6 @@ fecha_entrada,activo,sistema,precio_entrada,cantidad,capital_usdc,stop_loss,take
 2026-06-24,ADA/USDT,diario,0.1472,311.63829,42.0,0.1428,0.159,4.2%,,,2026-06-24 17:43,0.1428,-3.0,stop_loss,Primera señal COMPRAR sistema diario
 2026-06-25,BNB/USDT,4h,553.73,0.18,99.58,551.74,609.57,10%,,,2026-06-26 14:00,551.6558100558659,-0.37,stop_loss,Ejecución manual — señal 4h 25 junio
 2026-06-26 10:30,ADA/USDT,diario,0.1439,292.93,42.15,0.145,0.1557,4.2%,,,2026-06-27 20:00,0.145,0.76,stop_loss,Ejecucion automatica parcial
-2026-06-26 10:30,ETH/USDT,diario,1551.33,0.02836,43.98,1547.26,1708.43,4.6%,,,,,,,Ejecucion automatica parcial
+2026-06-26 10:30,ETH/USDT,diario,1551.33,0.02836,43.98,1547.26,1708.43,4.6%,,,2026-06-28 23:53,1547.26,-0.26,stop_loss,Ejecucion automatica parcial
 2026-06-26 10:30,BTC/USDT,diario,59725.99,0.0006,35.84,58531.47,64504.07,3.8%,,,2026-06-26 14:00,58529.9115,-2.0,stop_loss,Ejecucion manual — saldo insuficiente automatico
+2026-06-28 20:02,BNB/USDT,4h,549.15,0.182,100.0,537.4516,603.262,10.0%,,,,,Ejecución automática,,
