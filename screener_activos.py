@@ -71,7 +71,7 @@ def backtesting_periodo(scores, precios, umbral, stop, take, inicio, fin):
 UMBRAL = 6
 STOP   = 0.03
 TAKE   = 0.08
-VOLUMEN_MIN_USD = 50_000_000
+VOLUMEN_MIN_USD = 20_000_000
 
 YA_EN_SISTEMA = {'ADA/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'BTC/USDT', 'AVAX/USDT'}
 
