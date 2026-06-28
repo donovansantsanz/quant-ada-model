@@ -1,4 +1,6 @@
 import os
+import sys
+MODO_TEST = "--test" in sys.argv
 import ccxt
 import pandas as pd
 import numpy as np
@@ -167,8 +169,11 @@ for simbolo in PARAMS:
     enviar_telegram(mensaje)
     print(f"     {d['decision']} | Score: {d['puntos']} | RSI: {d['rsi']:.1f}")
     if d["decision"] == "COMPRAR":
-        from ejecutor import ejecutar_compra
-        ejecutar_compra(simbolo, d)
+        if MODO_TEST:
+            print(f"     [TEST] COMPRA simulada — no se ejecuta orden real")
+        else:
+            from ejecutor import ejecutar_compra
+            ejecutar_compra(simbolo, d)
 
 import json
 resultados_monitor = {}
