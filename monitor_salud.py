@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 from dotenv import load_dotenv
+from datetime import datetime, timezone
 from config import PARAMS, PARAMS_OBS
 
 load_dotenv()
@@ -55,6 +56,10 @@ def calcular_scores(precios):
     return scores
 
 def calcular_kelly_reciente(simbolo, umbral, stop, take, dias=90):
+    """
+    Devuelve (kelly, ops) donde kelly es float o None si no hay datos.
+    None significa que el sistema no generó señales en la ventana — no es Kelly negativo.
+    """
     df = obtener_datos(simbolo, dias=dias+50)
     precios = df['close'].iloc[50:].reset_index(drop=True)
     scores  = calcular_scores(df['close'])
@@ -75,42 +80,74 @@ def calcular_kelly_reciente(simbolo, umbral, stop, take, dias=90):
                 ganancias.append(retorno)
             else:
                 perdidas.append(abs(retorno))
+
+    # Sin datos suficientes — devolver None explícito, no -99
     if not ganancias or not perdidas:
-        return -99.0, 0
+        return None, len(ganancias) + len(perdidas)
+
     p = len(ganancias) / (len(ganancias) + len(perdidas))
     b = np.mean(ganancias) / np.mean(perdidas)
     kelly = (p * b - (1 - p)) / b * 100
     return round(kelly, 1), len(ganancias) + len(perdidas)
 
-from datetime import datetime, timezone
 print(f"Monitor de salud — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}\n")
 
 alertas = []
 resumen = []
 
-# Verificar activos operativos
+# ── Activos operativos ───────────────────────────────────────────────────────
 for simbolo, p in PARAMS.items():
     kelly, ops = calcular_kelly_reciente(simbolo, p['umbral'], p['stop'], p['take'])
-    estado = "✅" if kelly > 0 else "⚠️"
-    resumen.append(f"{estado} {simbolo}: Kelly 90d = {kelly}% ({ops} ops)")
-    print(f"{estado} {simbolo}: Kelly reciente = {kelly}% ({ops} ops)")
-    if kelly < 0:
-        alertas.append(f"⚠️ <b>{simbolo}</b> Kelly negativo en últimos 90d ({kelly}%) — revisar")
 
-# Verificar activos en observación
+    if kelly is None:
+        estado      = "⚪"
+        kelly_str   = "N/A"
+        linea       = f"{estado} {simbolo}: Kelly 90d = N/A ({ops} ops) — sin señales en ventana"
+        # Sin señales no es anomalía — no genera alerta
+    elif kelly > 0:
+        estado      = "✅"
+        kelly_str   = f"{kelly}%"
+        linea       = f"{estado} {simbolo}: Kelly 90d = {kelly_str} ({ops} ops)"
+    else:
+        estado      = "⚠️"
+        kelly_str   = f"{kelly}%"
+        linea       = f"{estado} {simbolo}: Kelly 90d = {kelly_str} ({ops} ops)"
+        # Alerta informativa — no prescribe acción
+        alertas.append(
+            f"⚠️ <b>{simbolo}</b> Kelly negativo en 90d ({kelly}%) — "
+            f"normal en ventanas sin tendencia, no requiere acción"
+        )
+
+    resumen.append(linea)
+    print(linea)
+
+# ── Activos en observación ───────────────────────────────────────────────────
 for simbolo, p in PARAMS_OBS.items():
     kelly, ops = calcular_kelly_reciente(simbolo, p['umbral'], p['stop'], p['take'])
-    estado = "🔄" if kelly > 0 else "👁"
-    resumen.append(f"{estado} {simbolo}: Kelly 90d = {kelly}% ({ops} ops)")
-    print(f"{estado} {simbolo}: Kelly reciente = {kelly}% ({ops} ops)")
-    if kelly > 0:
-        alertas.append(f"🔄 <b>{simbolo}</b> Kelly positivo en últimos 90d ({kelly}%) — considerar reincorporar")
 
-# Enviar resumen por Telegram
-msg = "<b>🏥 Monitor de salud semanal</b>\n\n"
+    if kelly is None:
+        estado    = "⚪"
+        linea     = f"{estado} {simbolo}: Kelly 90d = N/A ({ops} ops) — sin señales en ventana"
+    elif kelly > 0:
+        estado    = "👁"
+        linea     = f"{estado} {simbolo}: Kelly 90d = {kelly}% ({ops} ops)"
+        # Informativo — el gate de promoción es el walk-forward, no el rolling Kelly
+        alertas.append(
+            f"👁 <b>{simbolo}</b> Kelly positivo en 90d ({kelly}%) — "
+            f"en observación, gate de promoción es walk-forward"
+        )
+    else:
+        estado    = "👁"
+        linea     = f"{estado} {simbolo}: Kelly 90d = {kelly}% ({ops} ops)"
+
+    resumen.append(linea)
+    print(linea)
+
+# ── Telegram ─────────────────────────────────────────────────────────────────
+msg  = "<b>🏥 Monitor de salud semanal</b>\n\n"
 msg += "\n".join(resumen)
 if alertas:
-    msg += "\n\n<b>⚡ Alertas:</b>\n" + "\n".join(alertas)
+    msg += "\n\n<b>⚡ Info:</b>\n" + "\n".join(alertas)
 else:
     msg += "\n\n✅ Todo en orden"
 
