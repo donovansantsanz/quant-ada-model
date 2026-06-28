@@ -98,24 +98,21 @@ resumen = []
 # ── Activos operativos ───────────────────────────────────────────────────────
 for simbolo, p in PARAMS.items():
     kelly, ops = calcular_kelly_reciente(simbolo, p['umbral'], p['stop'], p['take'])
+    kelly_full = p.get('kelly', None)
+    full_str   = f"{kelly_full}%" if kelly_full is not None else "N/A"
 
     if kelly is None:
-        estado      = "⚪"
-        kelly_str   = "N/A"
-        linea       = f"{estado} {simbolo}: Kelly 90d = N/A ({ops} ops) — sin señales en ventana"
-        # Sin señales no es anomalía — no genera alerta
+        estado = "⚪"
+        linea  = f"{estado} {simbolo}: Kelly 90d = N/A ({ops} ops) | full-sample = {full_str} — sin señales en ventana"
     elif kelly > 0:
-        estado      = "✅"
-        kelly_str   = f"{kelly}%"
-        linea       = f"{estado} {simbolo}: Kelly 90d = {kelly_str} ({ops} ops)"
+        estado = "✅"
+        linea  = f"{estado} {simbolo}: Kelly 90d = {kelly}% ({ops} ops) | full-sample = {full_str}"
     else:
-        estado      = "⚠️"
-        kelly_str   = f"{kelly}%"
-        linea       = f"{estado} {simbolo}: Kelly 90d = {kelly_str} ({ops} ops)"
-        # Alerta informativa — no prescribe acción
+        estado = "⚠️"
+        linea  = f"{estado} {simbolo}: Kelly 90d = {kelly}% ({ops} ops) | full-sample = {full_str}"
         alertas.append(
-            f"⚠️ <b>{simbolo}</b> Kelly negativo en 90d ({kelly}%) — "
-            f"normal en ventanas sin tendencia, no requiere acción"
+            f"⚠️ <b>{simbolo}</b> Kelly 90d = {kelly}% vs full-sample = {full_str} — "
+            f"variación normal, no requiere acción"
         )
 
     resumen.append(linea)
