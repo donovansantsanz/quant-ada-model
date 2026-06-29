@@ -16,6 +16,7 @@ COLUMNAS = [
     'fecha_entrada', 'activo', 'sistema',
     'precio_entrada', 'cantidad', 'capital_usdc',
     'stop_loss', 'take_profit', 'kelly',
+    'precio_senal', 'slippage_bps',            # ← slippage
     'orden_stop_id', 'orden_take_id',          # ← nuevas
     'fecha_cierre', 'precio_cierre',
     'retorno_pct', 'resultado', 'notas',
@@ -142,6 +143,10 @@ Cantidad: {cantidad_real}
 
 <b>⚠️ Posición desprotegida hasta que lo hagas</b>""")
 
+        # ── Slippage: diferencia entre precio de señal y fill real ───────
+        precio_senal = round(precio, 6)
+        slippage_bps = round((precio_real - precio) / precio * 10000, 1)
+
         # ── Registro en CSV ──────────────────────────────────────────────
         nueva_fila = {
             'fecha_entrada':  datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M'),
@@ -153,6 +158,8 @@ Cantidad: {cantidad_real}
             'stop_loss':      stop_precio,
             'take_profit':    take_precio,
             'kelly':          f"{kelly_pct * 100:.1f}%",
+            'precio_senal':   precio_senal,
+            'slippage_bps':   slippage_bps,
             'orden_stop_id':  orden_stop_id,
             'orden_take_id':  orden_take_id,
             'fecha_cierre':   '',
