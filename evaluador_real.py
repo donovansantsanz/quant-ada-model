@@ -33,7 +33,8 @@ def evaluar_operaciones():
     actualizaciones = 0
 
     for idx, fila in df.iterrows():
-        if pd.notna(fila['resultado']) and fila['resultado'] != '':
+        resultado_val = str(fila['resultado']).strip() if pd.notna(fila['resultado']) else ''
+        if resultado_val != '':
             continue
 
         simbolo      = fila['activo'].replace('USDT', 'USDC')
