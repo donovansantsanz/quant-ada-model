@@ -140,9 +140,11 @@ print("Analizando mercado...\n")
 btc_ok, btc_msg = filtro_btc()
 print(f"Filtro BTC: {btc_msg}\n")
 
+resultados_monitor = {}
 for simbolo in PARAMS:
     print(f"  → {simbolo}")
     d = analizar(simbolo, btc_ok)
+    resultados_monitor[simbolo] = d
 
     if d['decision'] == "COMPRAR":
         emoji = "✅"
@@ -176,9 +178,6 @@ for simbolo in PARAMS:
             ejecutar_compra(simbolo, d)
 
 import json
-resultados_monitor = {}
-for simbolo in PARAMS:
-    resultados_monitor[simbolo] = analizar(simbolo, btc_ok)
 with open("/root/proyectos-quant/monitor_resultados.json", "w") as f:
     json.dump({k: {kk: float(vv) if hasattr(vv, "item") else vv for kk, vv in v.items()} for k, v in resultados_monitor.items()}, f)
 print("\n✅ Monitor V2 completado")
