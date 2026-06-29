@@ -49,7 +49,7 @@ if CSV_4H.exists():
         precio = f"${r['precio_entrada']:.2f}"
         print(f"  {icon} {r['activo']:<12} Score: {r['score']:>3}  RSI: {r['rsi']:.1f}  {precio}")
     compras_4h = (df4['decision'] == 'COMPRAR').sum()
-    prox_eval = df4['fecha_evaluacion'].dropna().iloc[0] if len(df4) > 0 else 'N/A'
+    prox_eval = df4['fecha_evaluacion'].dropna().iloc[-1] if len(df4) > 0 else 'N/A'
     print(f"\n  Total señales COMPRAR: {compras_4h} | Registros: {len(df4)}")
     print(f"  Próxima evaluación: {prox_eval}")
 else:
