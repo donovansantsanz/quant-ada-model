@@ -9,7 +9,7 @@ protegida manualmente. NO arreglar en caliente con operaciones parcheadas a mano
 
 ---
 
-## BUG 1 — Protección automática falla por latencia de saldo
+## BUG 1 — Protección automática falla por latencia de saldo  [ARREGLADO 30/06, pendiente confirmar en operación real]
 
 ### Síntoma
 Al abrir una operación, el ejecutor compra correctamente pero falla al colocar
