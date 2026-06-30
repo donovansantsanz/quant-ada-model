@@ -113,10 +113,28 @@ def ejecutar_compra(simbolo, señal):
         proteccion_ok = False
 
         try:
-            orden_stop_id, orden_take_id = colocar_ordenes_proteccion(
-                exchange, simbolo_usdc, cantidad_real, stop_precio, take_precio
-            )
-            proteccion_ok = True
+            # Reintento: el saldo puede tardar en asentarse tras la compra (latencia Binance)
+            import time as _time
+            ultimo_error = None
+            for intento in range(3):
+                try:
+                    _time.sleep(2)  # esperar a que el saldo se asiente
+                    # Usar saldo REAL disponible del activo, no la cantidad teorica
+                    base = simbolo_usdc.replace('USDC', '')
+                    bal = exchange.fetch_balance()
+                    disponible = bal['free'].get(base, cantidad_real)
+                    cantidad_proteger = min(cantidad_real, disponible)
+                    cantidad_proteger = float(exchange.amount_to_precision(simbolo_usdc, cantidad_proteger))
+                    orden_stop_id, orden_take_id = colocar_ordenes_proteccion(
+                        exchange, simbolo_usdc, cantidad_proteger, stop_precio, take_precio
+                    )
+                    proteccion_ok = True
+                    break
+                except Exception as e_intento:
+                    ultimo_error = e_intento
+                    print(f"  intento {intento+1}/3 fallo: {e_intento}")
+            if not proteccion_ok:
+                raise ultimo_error
             print(f"✅ Protección colocada — stop #{orden_stop_id} | take #{orden_take_id}")
 
             enviar_telegram(f"""<b>✅ EJECUCIÓN AUTOMÁTICA</b>
