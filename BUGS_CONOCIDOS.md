@@ -106,3 +106,33 @@ Ambos bugs se manifestaron porque los despliegues por scp no siempre
 sobrescribieron los archivos del servidor (pasó con ejecutor y evaluador).
 LECCIÓN: tras cada `scp`, verificar SIEMPRE en el servidor con `grep` que la
 versión nueva llegó, antes de confiar en ella.
+
+
+---
+
+## INCIDENTE - Error -2015 al operar (IPv6 vs whitelist Binance) [RESUELTO 01/07]
+
+### Sintoma
+Ordenes rechazadas con binance -2015: Invalid API-key, IP, or permissions.
+La lectura de saldo funcionaba, pero las ordenes fallaban. Senal de BTC del
+01/07 no se ejecuto por esto.
+
+### Causa raiz
+El servidor empezo a sacar trafico saliente por IPv6 (2a01:4f8:c2c:c1ff::1)
+en lugar de la IPv4 autorizada en Binance (116.203.91.120). Binance rechaza
+las ordenes desde IPs no incluidas en la whitelist de la API key.
+
+### Solucion aplicada
+Forzar prioridad de IPv4 sobre IPv6 a nivel de sistema:
+echo 'precedence ::ffff:0:0/96  100' >> /etc/gai.conf
+Verificacion: curl -s ifconfig.me debe devolver 116.203.91.120 (IPv4).
+
+### Si reaparece
+1. Comprobar IP de salida: curl -s ifconfig.me
+2. Si devuelve IPv6, verificar que la linea sigue en /etc/gai.conf
+3. Alternativa: anadir la IPv6 a la whitelist de Binance tambien
+4. El fix en gai.conf es persistente, pero revisar tras reinicios del VPS
+
+### Nota
+Este error NO es del codigo ni de las credenciales - es de red.
+No forzar operaciones manuales cuando aparece; arreglar la ruta de salida.
