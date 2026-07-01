@@ -44,7 +44,7 @@ Solo añade robustez, no cambia lógica de decisión. Se puede probar en testnet
 
 ---
 
-## BUG 2 — Evaluador empareja órdenes por símbolo, no por ID (vulnerable a zombis)
+## BUG 2 — Evaluador empareja órdenes por símbolo, no por ID (vulnerable a zombis)  [RESUELTO 01/07]
 
 ### Síntoma
 El evaluador cierra por error una operación que está realmente abierta, si existe
