@@ -16,10 +16,9 @@ def enviar_telegram(mensaje):
 ahora = datetime.now(timezone.utc)
 
 CHECKS = [
-    {'nombre': 'Monitor diario',       'log': '/root/logs/monitor.log',        'max_horas': 25},
-    {'nombre': 'Monitor 4h',           'log': '/root/logs/monitor_4h.log',     'max_horas': 5},
-    {'nombre': 'Paper trading diario', 'log': '/root/logs/paper_trading.log',  'max_horas': 25},
-    {'nombre': 'Paper trading 4h',     'log': '/root/logs/paper_trading_4h.log','max_horas': 5},
+    {'nombre': 'Monitor diario',   'log': '/root/logs/monitor.log',           'max_horas': 25},
+    {'nombre': 'Monitor 4h',       'log': '/root/logs/monitor_4h.log',        'max_horas': 5},
+    {'nombre': 'Evaluador real',   'log': '/root/logs/evaluador_real.log',    'max_horas': 2},
 ]
 
 alertas = []
