@@ -22,6 +22,11 @@ if not os.path.exists(ARCHIVO):
     exit()
 
 df = pd.read_csv(ARCHIVO)
+# Ventana de validacion: SOLO operaciones de Bitvavo (las de Binance son otra poblacion)
+if 'venue' not in df.columns:
+    df['venue'] = 'binance'
+df['venue'] = df['venue'].fillna('binance')
+df = df[df['venue'] == 'bitvavo'].copy()
 cerradas = df[df['resultado'].notna() & (df['resultado'] != '')].copy()
 abiertas = df[df['resultado'].isna() | (df['resultado'] == '')]
 

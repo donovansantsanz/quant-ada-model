@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 import requests
+from conexion import get_exchange
 
 load_dotenv()
 
@@ -15,16 +16,9 @@ def enviar_telegram(mensaje):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": CHAT_ID, "text": mensaje, "parse_mode": "HTML"})
 
-def get_exchange():
-    return ccxt.binance({
-        'apiKey':  os.getenv("BINANCE_API_KEY"),
-        'secret':  os.getenv("BINANCE_SECRET_KEY"),
-        'enableRateLimit': True,
-        'options': {'defaultType': 'spot', 'fetchCurrencies': False},
-    })
-
 def limpiar_id(x):
-    """Convierte un ID a string de digitos, quitando el .0 de floats."""
+    """Convierte un ID a string. Enteros de Binance -> str sin .0.
+    UUID de Bitvavo -> se devuelven tal cual (float() falla y cae al except)."""
     s = str(x).strip()
     if s.endswith('.0'):
         s = s[:-2]
@@ -60,14 +54,14 @@ def cancelar_orden(exchange, simbolo, orden_id, etiqueta='orden'):
 def colocar_stop_limit(exchange, simbolo, cantidad, stop_precio):
     stop_limit = round(stop_precio * 0.998, 4)
     orden = exchange.create_order(
-        simbolo, 'stop_loss_limit', 'sell', cantidad, stop_limit,
-        {'stopPrice': stop_precio, 'timeInForce': 'GTC'},
+        simbolo, 'stopLossLimit', 'sell', cantidad, stop_limit,
+        {'triggerPrice': stop_precio},
     )
     return orden['id']
 
 def registrar_cierre(df, idx, precio_entrada, precio_cierre, cantidad, resultado, ahora, extra=''):
-    retorno  = round((precio_cierre - precio_entrada) / precio_entrada * 100, 2)
-    pnl_usdc = round((precio_cierre - precio_entrada) * cantidad, 2)
+    retorno = round((precio_cierre - precio_entrada) / precio_entrada * 100, 2)
+    pnl_eur = round((precio_cierre - precio_entrada) * cantidad, 2)
     df.at[idx, 'fecha_cierre']  = ahora.strftime('%Y-%m-%d %H:%M')
     df.at[idx, 'precio_cierre'] = precio_cierre
     df.at[idx, 'retorno_pct']   = retorno
@@ -76,10 +70,10 @@ def registrar_cierre(df, idx, precio_entrada, precio_cierre, cantidad, resultado
     print(f"✅ {simbolo_orig} cerrado — {resultado} | {retorno:.2f}%")
     enviar_telegram(f"""<b>📊 Operación cerrada</b>
 {simbolo_orig}
-Entrada: ${precio_entrada}
-Cierre: ${precio_cierre:.4f}
+Entrada: €{precio_entrada}
+Cierre: €{precio_cierre:.4f}
 Retorno: <b>{retorno:.2f}%</b>
-P&L: <b>${pnl_usdc:+.2f} USDC</b>
+P&L: <b>€{pnl_eur:+.2f} EUR</b>
 Resultado: <b>{resultado}</b>{extra}""")
     return retorno
 
@@ -105,7 +99,7 @@ def evaluar_operaciones():
         if resultado_val not in ('', 'nan'):
             continue
 
-        simbolo        = str(fila['activo']).replace('USDT', 'USDC')
+        simbolo        = str(fila['activo']).replace('/USDT', '/EUR').replace('/USDC', '/EUR')
         simbolo_orig   = str(fila['activo'])
         precio_entrada = float(fila['precio_entrada'])
         stop           = float(fila['stop_loss'])
@@ -150,20 +144,19 @@ def evaluar_operaciones():
                             df.at[idx, 'stop_loss']     = nuevo_stop
                             df.at[idx, 'orden_stop_id'] = nuevo_stop_id
                             actualizaciones += 1
-                            print(f"🔼 {simbolo_orig} trailing: ${stop} -> ${nuevo_stop} (#{nuevo_stop_id})")
+                            print(f"🔼 {simbolo_orig} trailing: €{stop} -> €{nuevo_stop} (#{nuevo_stop_id})")
                             enviar_telegram(f"""<b>🔼 Trailing stop actualizado</b>
 {simbolo_orig}
-Precio actual: <b>${precio_actual:.4f}</b>
-Stop anterior: ${stop}
-Stop nuevo: <b>${nuevo_stop}</b>
-<i>Actualizado automáticamente en Binance</i>""")
+Precio actual: <b>€{precio_actual:.4f}</b>
+Stop anterior: €{stop}
+Stop nuevo: <b>€{nuevo_stop}</b>
+<i>Actualizado automáticamente en Bitvavo</i>""")
                         except Exception as te:
                             print(f"⚠️ Error trailing {simbolo_orig}: {te}")
                     else:
-                        print(f"⏸ {simbolo_orig} sin cambios | precio: ${precio_actual:.2f} | stop: ${stop}")
+                        print(f"⏸ {simbolo_orig} sin cambios | precio: €{precio_actual:.2f} | stop: €{stop}")
 
                 else:
-                    # Estado ambiguo (alguna orden canceovertida/inexistente sin ejecución clara)
                     print(f"⚠️ {simbolo_orig} estado ambiguo — stop:{est_stop} take:{est_take} — sin acción")
 
             # ── MÉTODO ANTIGUO (operaciones sin IDs, por compatibilidad) ─

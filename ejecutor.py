@@ -4,6 +4,7 @@ import ccxt
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 import requests
+from conexion import get_exchange
 
 load_dotenv()
 
@@ -16,70 +17,60 @@ COLUMNAS = [
     'fecha_entrada', 'activo', 'sistema',
     'precio_entrada', 'cantidad', 'capital_usdc',
     'stop_loss', 'take_profit', 'kelly',
-    'precio_senal', 'slippage_bps',            # ← slippage
-    'orden_stop_id', 'orden_take_id',          # ← nuevas
+    'precio_senal', 'slippage_bps',
+    'orden_stop_id', 'orden_take_id',
     'fecha_cierre', 'precio_cierre',
-    'retorno_pct', 'resultado', 'notas',
+    'retorno_pct', 'resultado', 'notas', 'venue',
 ]
 
 def enviar_telegram(mensaje):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": CHAT_ID, "text": mensaje, "parse_mode": "HTML"})
 
-def get_exchange():
-    return ccxt.binance({
-        'apiKey':  os.getenv("BINANCE_API_KEY"),
-        'secret':  os.getenv("BINANCE_SECRET_KEY"),
-        'enableRateLimit': True,
-        'options': {'defaultType': 'spot', 'fetchCurrencies': False},
-    })
-
-def saldo_disponible(exchange, moneda='USDC'):
+def saldo_disponible(exchange, moneda='EUR'):
     balance = exchange.fetch_balance()
     return balance['free'].get(moneda, 0)
 
 def posicion_abierta(exchange, simbolo):
     try:
-        ordenes = exchange.fetch_open_orders(simbolo.replace('USDT', 'USDC'))
+        ordenes = exchange.fetch_open_orders(simbolo.replace('/USDT', '/EUR').replace('/USDC', '/EUR'))
         return len(ordenes) > 0
     except:
         return False
 
-def colocar_ordenes_proteccion(exchange, simbolo_usdc, cantidad_real, stop_precio, take_precio):
+def colocar_ordenes_proteccion(exchange, simbolo, cantidad_real, stop_precio, take_precio):
     """
-    Coloca stop-limit y limit por separado.
+    Coloca stop-limit y limit por separado (Bitvavo, vía ccxt).
     Devuelve (orden_stop_id, orden_take_id) o lanza excepción.
-
-    - Stop-limit: se activa en stop_precio, ejecuta a stop_precio * 0.998
-    - Limit (take): ejecuta exactamente en take_precio
     """
     stop_limit = round(stop_precio * 0.998, 4)
 
-    # 1. Orden stop-limit (stop loss)
+    # 1. Stop-limit (stop loss) — Bitvavo: stopLossLimit + triggerPrice
     orden_stop = exchange.create_order(
-        simbolo_usdc,
-        'stop_loss_limit',
+        simbolo,
+        'stopLossLimit',
         'sell',
         cantidad_real,
         stop_limit,
-        {'stopPrice': stop_precio, 'timeInForce': 'GTC'},
+        {'triggerPrice': stop_precio},
     )
 
-    # 2. Orden limit (take profit)
+    # 2. Take-profit con trigger (no bloquea saldo hasta dispararse)
+    take_limit = round(take_precio * 0.998, 4)
     orden_take = exchange.create_order(
-        simbolo_usdc,
-        'limit',
+        simbolo,
+        'takeProfitLimit',
         'sell',
         cantidad_real,
-        take_precio,
-        {'timeInForce': 'GTC'},
+        take_limit,
+        {'triggerPrice': take_precio},
     )
 
     return orden_stop['id'], orden_take['id']
 
 def ejecutar_compra(simbolo, señal):
     exchange     = get_exchange()
-    simbolo_usdc = simbolo.replace('USDT', 'USDC')
+    simbolo_eur  = simbolo.replace('/USDT', '/EUR').replace('/USDC', '/EUR')
 
     if posicion_abierta(exchange, simbolo):
         print(f"⚠️ {simbolo}: posición ya abierta — ignorada")
@@ -90,8 +81,8 @@ def ejecutar_compra(simbolo, señal):
     saldo     = saldo_disponible(exchange)
 
     if saldo < 10:
-        print(f"⚠️ Saldo insuficiente: ${saldo:.2f} USDC")
-        enviar_telegram(f"⚠️ Saldo insuficiente: ${saldo:.2f} USDC — operación cancelada")
+        print(f"⚠️ Saldo insuficiente: €{saldo:.2f} EUR")
+        enviar_telegram(f"⚠️ Saldo insuficiente: €{saldo:.2f} EUR — operación cancelada")
         return False
 
     capital      = round(min(capital, saldo * 0.99), 2)
@@ -101,32 +92,28 @@ def ejecutar_compra(simbolo, señal):
     take_precio  = round(precio * (1 + señal['take'] / 100), 4)
 
     try:
-        # ── Compra de mercado ────────────────────────────────────────────
-        orden         = exchange.create_market_buy_order(simbolo_usdc, cantidad)
+        orden         = exchange.create_market_buy_order(simbolo_eur, cantidad)
         precio_real   = orden['average'] or precio
         cantidad_real = orden['filled']
-        print(f"✅ Compra: {cantidad_real} {simbolo} a ${precio_real}")
+        print(f"✅ Compra: {cantidad_real} {simbolo} a €{precio_real}")
 
-        # ── Órdenes de protección ────────────────────────────────────────
         orden_stop_id = ''
         orden_take_id = ''
         proteccion_ok = False
 
         try:
-            # Reintento: el saldo puede tardar en asentarse tras la compra (latencia Binance)
             import time as _time
             ultimo_error = None
             for intento in range(3):
                 try:
-                    _time.sleep(2)  # esperar a que el saldo se asiente
-                    # Usar saldo REAL disponible del activo, no la cantidad teorica
-                    base = simbolo_usdc.replace('USDC', '')
+                    _time.sleep(2)
+                    base = simbolo_eur.split('/')[0]
                     bal = exchange.fetch_balance()
                     disponible = bal['free'].get(base, cantidad_real)
                     cantidad_proteger = min(cantidad_real, disponible)
-                    cantidad_proteger = float(exchange.amount_to_precision(simbolo_usdc, cantidad_proteger))
+                    cantidad_proteger = float(exchange.amount_to_precision(simbolo_eur, cantidad_proteger))
                     orden_stop_id, orden_take_id = colocar_ordenes_proteccion(
-                        exchange, simbolo_usdc, cantidad_proteger, stop_precio, take_precio
+                        exchange, simbolo_eur, cantidad_proteger, stop_precio, take_precio
                     )
                     proteccion_ok = True
                     break
@@ -139,33 +126,31 @@ def ejecutar_compra(simbolo, señal):
 
             enviar_telegram(f"""<b>✅ EJECUCIÓN AUTOMÁTICA</b>
 {simbolo}
-Precio entrada: <b>${precio_real:.4f}</b>
+Precio entrada: <b>€{precio_real:.4f}</b>
 Cantidad: <b>{cantidad_real}</b>
-Capital: <b>${capital:.2f} USDC</b>
-Stop loss: ${stop_precio} (ID: {orden_stop_id})
-Take profit: ${take_precio} (ID: {orden_take_id})
+Capital: <b>€{capital:.2f} EUR</b>
+Stop loss: €{stop_precio} (ID: {orden_stop_id})
+Take profit: €{take_precio} (ID: {orden_take_id})
 <i>Órdenes colocadas automáticamente</i>""")
 
         except Exception as prot_err:
             print(f"⚠️ Error colocando protección: {prot_err}")
             enviar_telegram(f"""<b>⚠️ COMPRA EJECUTADA — PROTECCIÓN MANUAL REQUERIDA</b>
 {simbolo}
-Precio entrada: <b>${precio_real:.4f}</b>
+Precio entrada: <b>€{precio_real:.4f}</b>
 Cantidad: <b>{cantidad_real}</b>
-Capital: <b>${capital:.2f} USDC</b>
+Capital: <b>€{capital:.2f} EUR</b>
 
-Coloca manualmente en Binance:
-• Stop limit — trigger: {stop_precio} | limit: {round(stop_precio * 0.998, 4)}
-• Take profit — limit: {take_precio}
+Coloca manualmente en Bitvavo:
+- Stop limit — trigger: {stop_precio} | limit: {round(stop_precio * 0.998, 4)}
+- Take profit — limit: {take_precio}
 Cantidad: {cantidad_real}
 
 <b>⚠️ Posición desprotegida hasta que lo hagas</b>""")
 
-        # ── Slippage: diferencia entre precio de señal y fill real ───────
         precio_senal = round(precio, 6)
         slippage_bps = round((precio_real - precio) / precio * 10000, 1)
 
-        # ── Registro en CSV ──────────────────────────────────────────────
         nueva_fila = {
             'fecha_entrada':  datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M'),
             'activo':         simbolo,
@@ -185,6 +170,7 @@ Cantidad: {cantidad_real}
             'retorno_pct':    '',
             'resultado':      '',
             'notas':          'Automática' if proteccion_ok else 'Protección manual pendiente',
+            'venue':          'bitvavo',
         }
 
         file_exists = os.path.exists(ARCHIVO)
@@ -206,6 +192,6 @@ Cantidad: {cantidad_real}
 if __name__ == "__main__":
     exchange = get_exchange()
     saldo    = saldo_disponible(exchange)
-    print(f"✅ Conexión OK — Saldo USDC: ${saldo:.2f}")
-    print(f"   Capital base: ${CAPITAL_BASE}")
-    print(f"   Kelly/4 máx (10%): ${CAPITAL_BASE * 0.10:.0f} por operación")
+    print(f"✅ Conexión OK — Saldo EUR: €{saldo:.2f}")
+    print(f"   Capital base: €{CAPITAL_BASE}")
+    print(f"   Kelly/4 máx (10%): €{CAPITAL_BASE * 0.10:.0f} por operación")

@@ -19,7 +19,7 @@ def enviar_telegram(mensaje):
     requests.post(url, data={"chat_id": CHAT_ID, "text": mensaje, "parse_mode": "HTML"})
 
 def analizar_4h(simbolo):
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     velas = exchange.fetch_ohlcv(simbolo, timeframe="4h", limit=500)
     df = pd.DataFrame(velas, columns=["timestamp","open","high","low","close","volume"])
     df = df.sort_values("timestamp").reset_index(drop=True)
@@ -91,7 +91,7 @@ for simbolo in PARAMS_4H:
     if d["decision"] == "COMPRAR":
         stop_precio = round(d["precio"] * (1 - d["stop"]/100), 4)
         take_precio = round(d["precio"] * (1 + d["take"]/100), 4)
-        msg = f"<b>SIGNAL 4H — {simbolo}</b>\n\nPrecio: <b>${d['precio']:.4f}</b>\nScore: <b>{d['puntos']}/{d['umbral']}</b>\nRSI: <b>{d['rsi']:.1f}</b>\n\nStop: ${stop_precio} ({d['stop']:.0f}%)\nTake: ${take_precio} ({d['take']:.0f}%)\nHorizonte: {d['horizonte']}h\nKelly/4: {d['sizing']}\n\n<b>COMPRAR</b>"
+        msg = f"<b>SIGNAL 4H — {simbolo}</b>\n\nPrecio: <b>€{d['precio']:.4f}</b>\nScore: <b>{d['puntos']}/{d['umbral']}</b>\nRSI: <b>{d['rsi']:.1f}</b>\n\nStop: €{stop_precio} ({d['stop']:.0f}%)\nTake: €{take_precio} ({d['take']:.0f}%)\nHorizonte: {d['horizonte']}h\nKelly/4: {d['sizing']}\n\n<b>COMPRAR</b>"
         enviar_telegram(msg)
         print(f"     Telegram enviado")
         if MODO_TEST:

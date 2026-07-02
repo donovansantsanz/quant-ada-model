@@ -17,12 +17,10 @@ def enviar_telegram(mensaje):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": CHAT_ID, "text": mensaje, "parse_mode": "HTML"})
 
-# ── PARÁMETROS ÓPTIMOS POR ACTIVO ────────────────────────────────
-
 # ── FILTRO BTC ───────────────────────────────────────────────────
 def filtro_btc():
-    exchange   = ccxt.binance()
-    velas      = exchange.fetch_ohlcv('BTC/USDT', timeframe='1d', limit=10)
+    exchange   = ccxt.bitvavo()
+    velas      = exchange.fetch_ohlcv('BTC/EUR', timeframe='1d', limit=10)
     df         = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
     precios    = df['close']
     mom_7      = precios.iloc[-1] / precios.iloc[-8] - 1
@@ -34,7 +32,7 @@ def filtro_btc():
 
 # ── ANÁLISIS POR ACTIVO ──────────────────────────────────────────
 def analizar(simbolo, btc_ok):
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     velas    = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=365)
     df       = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
     df['fecha'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -130,10 +128,10 @@ def analizar(simbolo, btc_ok):
     }
 
 # ── EJECUTAR ─────────────────────────────────────────────────────
-from datetime import datetime
+from datetime import datetime, timezone
 sep = "=" * 40
 print(f"\n{sep}")
-print(f"Ejecucion: {datetime.now(__import__("datetime").timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
+print(f"Ejecucion: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
 print(f"{sep}\n")
 print("Analizando mercado...\n")
 
@@ -155,7 +153,7 @@ for simbolo in PARAMS:
 
     mensaje = f"""<b>📊 {simbolo} — Monitor V2</b>
 
-💰 Precio: <b>${d['precio']:.4f}</b>
+💰 Precio: <b>€{d['precio']:.4f}</b>
 📈 RSI: <b>{d['rsi']:.1f}</b>
 ⚡ Score: <b>{d['puntos']}/10</b> (umbral: {d['umbral']})
 🎲 MC prob subida: <b>{d['prob_mc']:.1f}%</b>
@@ -190,7 +188,7 @@ btc_ok_obs, _ = filtro_btc()
 
 obs_lineas = []
 for simbolo, params in PARAMS_OBS.items():
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     velas    = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=365)
     df       = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
     precios  = df['close']
@@ -230,11 +228,9 @@ for simbolo, params in PARAMS_OBS.items():
     precio = ticker['last']
     umbral = params['umbral']
     cerca  = "⚡ CERCA" if puntos >= umbral - 1 else ""
-    obs_lineas.append(f"  {simbolo}: score {puntos} / umbral {umbral} — ${precio:.2f} {cerca}")
+    obs_lineas.append(f"  {simbolo}: score {puntos} / umbral {umbral} — €{precio:.2f} {cerca}")
     print(f"  {simbolo}: {puntos}/{umbral}")
 
 obs_msg = "<b>👁 Activos en observación</b>\n\n" + "\n".join(obs_lineas)
 enviar_telegram(obs_msg)
 print("\n✅ Observación enviada")
-
-# ── GUARDAR RESULTADOS EN JSON ───────────────────────────────────

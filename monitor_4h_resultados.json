@@ -1,1 +1,1 @@
-{"BNB/USDT": {"precio": 556.45, "decision": "MANTENER", "puntos": 2, "score": 2, "kelly": 44.6, "umbral": 6, "rsi": 42.65168539325846, "sizing": "\u2014", "stop": 2.0, "take": 10.0, "horizonte": 24}}
+{"BNB/EUR": {"precio": 490.26, "decision": "MANTENER", "puntos": -5, "score": -5, "kelly": 44.6, "umbral": 6, "rsi": 55.85632483081728, "sizing": "\u2014", "stop": 2.0, "take": 10.0, "horizonte": 24}}
