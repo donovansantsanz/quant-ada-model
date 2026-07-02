@@ -5,6 +5,14 @@ built in Python from scratch by an 18-year-old mathematics student.
 Analyzes 5 assets on a daily timeframe and BNB on a 4H timeframe,
 with automatic execution, Telegram alerts, and real capital deployed.
 
+> **July 2026 — Exchange migration.** On July 1st 2026, Binance suspended spot
+> services for EU users pending MiCA licensing. The system was migrated to
+> **Bitvavo** (MiCA-licensed, EUR pairs) in a single day: exchange layer,
+> order-type syntax, and pair notation were all adapted. The strategy logic
+> (scoring, filters, sizing) is exchange-agnostic and unchanged. Live-validation
+> operations from Binance are archived separately (`venue` column) so the
+> Bitvavo validation window starts clean.
+
 ## Model Evolution
 
 ### V1 (baseline)
@@ -24,75 +32,77 @@ with automatic execution, Telegram alerts, and real capital deployed.
 
 ## Walk-Forward Validation Results (Daily System)
 
-| Asset     | Sharpe Train | Sharpe Test | Kelly  | BTC Filter | Status      |
-|-----------|-------------|-------------|--------|------------|-------------|
-| ADA/USDT  | 2.92        | 11.57       | 16.9%  | Active     | ✅ Live     |
-| SOL/USDT  | 7.61        | 6.35        | 23.1%  | Disabled   | ✅ Live     |
-| ETH/USDT  | 3.14        | 0.83        | 18.3%  | Active     | ✅ Live     |
-| BNB/USDT  | 7.29        | 7.14        | 28.4%  | Active     | ✅ Live     |
-| BTC/USDT  | 4.39        | 4.49        | 15.1%  | Disabled   | ✅ Live     |
-| AVAX/USDT | —           | —           | —      | Disabled   | 👁 Obs      |
-| XRP/USDT  | —           | 3.35        | —      | Disabled   | 👁 Obs      |
+| Asset    | Sharpe Train | Sharpe Test | Kelly  | BTC Filter | Status      |
+|----------|-------------|-------------|--------|------------|-------------|
+| ADA/EUR  | 2.92        | 11.57       | 16.9%  | Active     | ✅ Live     |
+| SOL/EUR  | 7.61        | 6.35        | 23.1%  | Disabled   | ✅ Live     |
+| ETH/EUR  | 3.14        | 0.83        | 18.3%  | Active     | ✅ Live     |
+| BNB/EUR  | 7.29        | 7.14        | 28.4%  | Active     | ✅ Live     |
+| BTC/EUR  | 4.39        | 4.49        | 15.1%  | Disabled   | ✅ Live     |
+| AVAX/EUR | —           | —           | —      | Disabled   | 👁 Obs      |
+| XRP/EUR  | —           | 3.35        | —      | Disabled   | 👁 Obs      |
+
+*Walk-forward validated on Binance/USDT historical data prior to the July 2026 MiCA migration. BTC's high train Sharpe collapsing out-of-sample is a documented example of overfitting; it is the weakest active asset and monitored accordingly.*
 
 ## Walk-Forward Validation Results (4H System)
 
-| Asset     | Sharpe Train | Sharpe Test | Status      |
-|-----------|-------------|-------------|-------------|
-| BNB/USDT  | 0.45        | 0.32        | ✅ Live     |
-| ETH/USDT  | —           | Negative    | ❌ Rejected |
-| ADA/USDT  | —           | Negative    | ❌ Rejected |
-| SOL/USDT  | —           | Negative    | ❌ Rejected |
+| Asset    | Sharpe Train | Sharpe Test | Status      |
+|----------|-------------|-------------|-------------|
+| BNB/EUR  | 0.45        | 0.32        | ✅ Live     |
+| ETH/EUR  | —           | Negative    | ❌ Rejected |
+| ADA/EUR  | —           | Negative    | ❌ Rejected |
+| SOL/EUR  | —           | Negative    | ❌ Rejected |
+
+*Validated on Binance/USDT historical data prior to migration. BNB is the only 4H asset with a consistent positive out-of-sample test.*
 
 ## Optimized Parameters (Daily System)
 
-| Asset     | Threshold | Stop Loss | Take Profit | BTC Filter |
-|-----------|-----------|-----------|-------------|------------|
-| ADA/USDT  | 5/10      | 3%        | 8%          | Active     |
-| SOL/USDT  | 6/10      | 3%        | 10%         | Disabled   |
-| ETH/USDT  | 4/10      | 3%        | 10%         | Active     |
-| BNB/USDT  | 7/10      | 2%        | 10%         | Active     |
-| BTC/USDT  | 5/10      | 2%        | 8%          | Disabled   |
+| Asset    | Threshold | Stop Loss | Take Profit | BTC Filter |
+|----------|-----------|-----------|-------------|------------|
+| ADA/EUR  | 5/10      | 3%        | 8%          | Active     |
+| SOL/EUR  | 6/10      | 3%        | 10%         | Disabled   |
+| ETH/EUR  | 4/10      | 3%        | 10%         | Active     |
+| BNB/EUR  | 7/10      | 2%        | 10%         | Active     |
+| BTC/EUR  | 5/10      | 2%        | 8%          | Disabled   |
 
 ## Automation Pipeline
 
 1. **monitor_v2.py** runs at 10:30 UTC — calculates scores, applies BTC filter, saves signals to JSON
-2. **ejecutor.py** reads JSON — if COMPRAR signal and no open position, executes market buy, places stop-limit + limit orders automatically, logs to CSV
-3. **evaluador_real.py** runs hourly — detects closed positions, cancels orphan orders, applies trailing stop in Binance
-4. **monitor_4h.py** runs every 4H — same pipeline for 4H system
-5. **monitor_salud.py** runs Sundays 10:00 UTC — rolling 90d Kelly vs full-sample Kelly per asset
-6. **evaluador.py** runs Mondays 11:00 UTC — weekly Telegram summary
-7. **watchdog.py** monitors system health — Telegram alert on failure
+2. **ejecutor.py** — on a COMPRAR signal with no open position, executes market buy and places protection orders automatically (stopLossLimit + takeProfitLimit, both trigger-based so neither locks balance until it fires), logs to CSV
+3. **evaluador_real.py** runs hourly — matches orders by ID, detects closed positions, cancels orphan orders, applies trailing stop on Bitvavo
+4. **monitor_4h.py** runs every 4H — same pipeline for the 4H system
+5. **watchdog.py** runs hourly — log/disk/memory health, Telegram alert on failure
 
 ## Position Sizing
 
-- Capital base: $1,000 USDC
+- Capital base: €1,000 (scaling up progressively)
 - Kelly/4 with 10% cap per asset
-- Available USDC balance used when below Kelly-calculated capital
-- Stop-limit + limit orders placed automatically after every buy
+- Real available EUR balance used when below Kelly-calculated capital
+- stopLossLimit + takeProfitLimit orders placed automatically after every buy
 - Trailing stop: 2% below current price when position moves favorably
 
-## Scripts in Production (22)
+## Scripts (22)
 
 | Script | Description |
 |--------|-------------|
+| conexion.py | Centralized Bitvavo connection (credentials + mandatory operatorId) |
 | config.py | Single source of parameters — daily system |
+| config_4h.py | Parameters — 4H system |
 | monitor_v2.py | Daily monitor — scores, BTC filter, JSON output |
 | monitor_4h.py | 4H monitor — scores, JSON output |
-| ejecutor.py | Automatic execution — buy + stop-limit + limit |
-| evaluador_real.py | Hourly evaluator — orphan cancel, trailing stop, P&L |
-| evaluador.py | Weekly Telegram summary — Mondays 11:00 UTC |
-| monitor_salud.py | Weekly health check — Sundays 10:00 UTC |
+| ejecutor.py | Automatic execution — buy + stopLossLimit + takeProfitLimit |
+| evaluador_real.py | Hourly evaluator — ID matching, orphan cancel, trailing stop, P&L |
+| monitor_salud.py | Weekly health check — rolling 90d Kelly vs full-sample |
 | paper_trading.py | Daily paper trading — signal logging |
 | paper_trading_4h.py | 4H paper trading — signal logging |
 | walk_forward.py | Out-of-sample validation — daily system |
 | screener_activos.py | Asset screener with liquidity filter + multiple testing correction |
-| checklist_expansion.py | Objective criteria for capital expansion |
+| checklist_expansion.py | Objective criteria for capital expansion (Bitvavo window only) |
 | optimizador.py | Grid search calibration — daily system |
 | optimizador_4h.py | Grid search calibration — 4H system |
 | analisis_drawdown.py | Drawdown and streak analysis |
 | stress_test.py | Historical stress test 2021–2026 |
 | resumen_modelo.py | Printable technical sheet — daily system |
-| resumen_modelo_4h.py | Printable technical sheet — 4H system |
 | dashboard.py | Full system status in one command |
 | mis_operaciones.py | Live P&L of open positions |
 | historial.py | Clean view of daily paper trading CSV |
@@ -103,16 +113,15 @@ with automatic execution, Telegram alerts, and real capital deployed.
 | Component | Detail |
 |-----------|--------|
 | Server | Hetzner CX22 — Ubuntu 24.04 |
-| IP | 116.203.91.120 |
-| Exchange | Binance Spot (USDC pairs) |
-| Data | ccxt library |
+| Exchange | Bitvavo Spot (EUR pairs, MiCA-licensed) |
+| Data & orders | ccxt library |
 | Notifications | Telegram bot |
-| Scheduling | cron (6 tasks) |
+| Scheduling | cron (4 active tasks) |
 | Version control | GitHub |
 
 ## Capital Expansion Checklist
 
-Before scaling capital, all 4 criteria must be met:
+Before scaling capital, all 4 criteria must be met (Bitvavo validation window):
 - [ ] ≥ 30 closed operations
 - [ ] Win rate ≥ 30%
 - [ ] Consistency with backtest ± 15%
