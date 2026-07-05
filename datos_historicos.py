@@ -6,10 +6,10 @@ from datetime import datetime
 # ── DESCARGAR HISTÓRICO DESDE BINANCE ───────────────────────────
 print("Descargando datos históricos de Binance...")
 
-exchange = ccxt.binance()
+exchange = ccxt.bitvavo()
 
 # 365 días de velas diarias
-velas = exchange.fetch_ohlcv('ADA/USDT', timeframe='1d', limit=365)
+velas = exchange.fetch_ohlcv('ADA/EUR', timeframe='1d', limit=365)
 
 # Convertir a DataFrame
 df = pd.DataFrame(velas, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])

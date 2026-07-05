@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 from config_4h import PARAMS_4H
 
-exchange = ccxt.binance()
+exchange = ccxt.bitvavo()
 
 def calcular_score(df, idx):
     precios = df['close']

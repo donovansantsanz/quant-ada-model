@@ -13,7 +13,7 @@ print(f"  {'Activo':<12} {'Umbral':<8} {'Stop':<7} {'Take':<7} {'Kelly':<8} {'Ho
 print(f"  {'─'*70}")
 
 WALK_FORWARD = {
-    'BNB/USDT': {'sharpe_train': 2.23, 'sharpe_test': 0.32, 'win_rate': 75.0},
+    'BNB/EUR': {'sharpe_train': 2.23, 'sharpe_test': 0.32, 'win_rate': 75.0},
 }
 
 for simbolo, p in PARAMS_4H.items():
@@ -29,10 +29,10 @@ print(f"  {'Activo':<12} {'Razón':<45} {'Sharpe test'}")
 print(f"  {'─'*70}")
 
 OBS_SHARPE = {
-    'ETH/USDT': -2.50,
-    'ADA/USDT': -2.70,
-    'SOL/USDT': -2.50,
-    'BTC/USDT': -0.18,
+    'ETH/EUR': -2.50,
+    'ADA/EUR': -2.70,
+    'SOL/EUR': -2.50,
+    'BTC/EUR': -0.18,
 }
 
 for simbolo in PARAMS_4H_OBS:

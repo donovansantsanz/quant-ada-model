@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 
 def obtener_datos(simbolo, dias=500):
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     velas = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=dias)
     df = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
     df['fecha'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -73,19 +73,19 @@ STOP   = 0.03
 TAKE   = 0.08
 VOLUMEN_MIN_USD = 20_000_000
 
-YA_EN_SISTEMA = {'ADA/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'BTC/USDT', 'AVAX/USDT'}
+YA_EN_SISTEMA = {'ADA/EUR', 'ETH/EUR', 'SOL/EUR', 'BNB/EUR', 'BTC/EUR', 'AVAX/EUR'}
 
 CANDIDATOS = [
-    'XRP/USDT', 'DOGE/USDT', 'LINK/USDT', 'DOT/USDT', 'POL/USDT',
-    'LTC/USDT', 'ATOM/USDT', 'NEAR/USDT', 'APT/USDT', 'ARB/USDT',
-    'OP/USDT', 'INJ/USDT', 'FIL/USDT', 'TON/USDT', 'SUI/USDT',
+    'XRP/EUR', 'DOGE/EUR', 'LINK/EUR', 'DOT/EUR', 'POL/EUR',
+    'LTC/EUR', 'ATOM/EUR', 'NEAR/EUR', 'APT/EUR', 'ARB/EUR',
+    'OP/EUR', 'INJ/EUR', 'FIL/EUR', 'TON/EUR', 'SUI/EUR',
 ]
 
 print("=" * 70)
 print("  SCREENER DE ACTIVOS — Walk-Forward con correccion multiples pruebas")
 print("=" * 70)
 
-exchange = ccxt.binance()
+exchange = ccxt.bitvavo()
 
 print(f"\n  Filtro de liquidez (volumen diario > ${VOLUMEN_MIN_USD/1e6:.0f}M)...\n")
 candidatos_liquidos = []

@@ -40,7 +40,7 @@ def calcular_scores(precios):
     return scores
 
 def backtesting_completo(simbolo, umbral, stop, take, kelly, dias=500):
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     velas = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=dias)
     df = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
     df = df.sort_values('timestamp').reset_index(drop=True)
@@ -118,7 +118,7 @@ scripts = [
     ("config.py",              "Parametros sistema diario"),
     ("config_4h.py",           "Parametros sistema 4h"),
     ("monitor_v2.py",          "Monitor diario — alertas Telegram"),
-    ("monitor_4h.py",          "Monitor 4h — BNB/USDT"),
+    ("monitor_4h.py",          "Monitor 4h — BNB/EUR"),
     ("paper_trading.py",       "Paper trading diario"),
     ("paper_trading_4h.py",    "Paper trading 4h"),
     ("ejecutor.py",            "Ejecucion automatica — Binance API"),

@@ -5,7 +5,7 @@ from scipy import stats
 from config import PARAMS
 
 def obtener_datos(simbolo, dias=3000):
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     todos = []
     since = None
     while len(todos) < dias:
@@ -136,7 +136,7 @@ PERIODOS = {
 ACTIVOS_OP = {k: v for k, v in PARAMS.items() if v['kelly'] > 0}
 
 print("Descargando BTC para filtro...")
-df_btc = obtener_datos('BTC/USDT')
+df_btc = obtener_datos('BTC/EUR')
 btc_map = calcular_btc_mom(df_btc, None)
 print("✅ BTC listo\n")
 

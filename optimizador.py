@@ -5,7 +5,7 @@ from scipy import stats
 from itertools import product
 
 def obtener_datos(simbolo, dias=365):
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     velas = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=dias)
     df = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
     df['fecha'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -74,7 +74,7 @@ def backtesting(scores, precios, umbral, stop, take):
     r = np.array(retornos)
     return r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else -999
 
-ACTIVOS = ['BTC/USDT', 'BNB/USDT', 'AVAX/USDT']
+ACTIVOS = ['BTC/EUR', 'BNB/EUR', 'AVAX/EUR']
 UMBRALES = [3, 4, 5, 6, 7]
 STOPS    = [0.02, 0.03, 0.05]
 TAKES    = [0.06, 0.08, 0.10, 0.15]

@@ -8,12 +8,8 @@ load_dotenv()
 ARCHIVO = '/root/proyectos-quant/operaciones_reales.csv'
 
 def get_exchange():
-    return ccxt.binance({
-        'apiKey': os.getenv("BINANCE_API_KEY"),
-        'secret': os.getenv("BINANCE_SECRET_KEY"),
-        'enableRateLimit': True,
-        'options': {'defaultType': 'spot', 'fetchCurrencies': False},
-    })
+    from conexion import get_exchange as _get
+    return _get()
 
 ahora = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
 print("=" * 64)
@@ -50,7 +46,7 @@ else:
         dist_take = (take - precio_actual) / precio_actual * 100
 
         icono = "🟢" if retorno_pct >= 0 else "🔴"
-        activo_str = r['activo'].replace('/USDT', '')
+        activo_str = r['activo'].replace('/EUR', '')
 
         print(f"  {icono} {activo_str:<5} | Entrada: ${p_entrada:<11.4f} Actual: ${precio_actual:<11.4f}")
         print(f"         P&L: {retorno_pct:+.2f}% (${pnl_usdc:+.2f})")

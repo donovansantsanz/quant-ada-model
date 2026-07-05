@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 
 def obtener_datos(simbolo, dias=500):
-    exchange = ccxt.binance()
+    exchange = ccxt.bitvavo()
     velas = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=dias)
     df = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
     df['fecha'] = pd.to_datetime(df['timestamp'], unit='ms')

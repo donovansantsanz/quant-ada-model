@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 from itertools import product
 
-exchange = ccxt.binance()
+exchange = ccxt.bitvavo()
 
 def obtener_datos_4h(simbolo, limit=500):
     velas = exchange.fetch_ohlcv(simbolo, timeframe='4h', limit=limit)
@@ -99,7 +99,7 @@ def optimizar(simbolo):
 
     return mejor_params
 
-ACTIVOS = ['ETH/USDT', 'ADA/USDT', 'SOL/USDT', 'BNB/USDT']
+ACTIVOS = ['ETH/EUR', 'ADA/EUR', 'SOL/EUR', 'BNB/EUR']
 
 print("=" * 60)
 print("  OPTIMIZADOR 4H — Grid search en datos train (70%)")
