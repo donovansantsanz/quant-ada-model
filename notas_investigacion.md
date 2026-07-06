@@ -45,3 +45,33 @@ umbral alto está filtrando señales falsas necesarias (ruido).
 3. NO tocar hasta cerrar la ventana de validación actual de Bitvavo (0/30 ops).
 
 ---
+
+## 2026-07-06 — ¿Complementar mean-reversion con momentum?
+
+**Contexto.** El sistema lleva ~5 días sin operar tras la migración a Bitvavo.
+Los activos están en pleno rebote (scores negativos, RSI altos), y el sistema
+mean-reversion no encuentra sobreventa. Esto genera periodos largos sin actividad
+cuando el mercado está en tendencia alcista o rebotando con fuerza.
+
+**Observación.** El sistema actual es mean-reversion puro: solo compra debilidad.
+Eso implica un sesgo estructural a ciertos regímenes — funciona en mercados
+laterales/volátiles (sobrerreacciones frecuentes), pero se queda completamente
+fuera en tendencias alcistas sostenidas o rebotes fuertes.
+
+**Pregunta de investigación para el futuro:**
+¿Añadir una pata de momentum (comprar fuerza confirmada) complementaría el
+sistema, cubriendo los regímenes donde mean-reversion no opera? Los sistemas
+profesionales suelen combinar ambas filosofías con un filtro de régimen que
+decide cuál activar.
+
+**Posible ángulo para el TFG:** comparación sistemática mean-reversion vs momentum
+vs combinación en cripto spot, con walk-forward y análisis de régimen. Tema
+cuantitativo con aplicación directa al sistema real.
+
+**Cautelas:**
+1. NO tocar el sistema actual hasta cerrar la ventana de validación (0/30 ops).
+2. Añadir momentum es un orden de magnitud más complejo que lo actual.
+3. Explorar solo después de que mean-reversion tenga datos suficientes para
+   evaluar si su edge sobrevive en producción real.
+
+---
