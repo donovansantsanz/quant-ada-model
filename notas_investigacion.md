@@ -75,3 +75,71 @@ cuantitativo con aplicación directa al sistema real.
    evaluar si su edge sobrevive en producción real.
 
 ---
+
+## Análisis de Régimen — 7 julio 2026
+
+**Confirmación:** Sistema NO está roto. Régimen es adverso.
+
+**Estado actual:**
+- SOL/ETH: TRENDING UP fuerte + ARRIBA MA20 + OVERBOUGHT → mean-reversion muerta
+- ADA/BNB/BTC: MIXTO — precios arriba MA20 pero sin tendencia clara
+
+**Por qué no hay señales:**
+- Mean-reversion busca sobreventa (RSI < 30, precio < MA20)
+- Post-rebote (+10-13% últimos 7d): mercado está arriba, no abajo
+- Kelly rolling 90d NEGATIVO en todos los activos
+
+**Cuándo vuelve el edge:**
+- Siguiente corrección significativa (precio < MA20 o RSI < 40)
+- O inversión sostenida en MA20 slope
+
+**Acción:** Vigilancia. No tocar parámetros hasta 30 ops de Bitvavo completadas.
+
+
+## 8 julio 2026 — Bug corregido: Acumulación de posiciones BNB
+
+Monitor_4h ejecutó dos compras BNB simultáneamente (mismo 4H):
+- 1ª: €498.54 × 0.2006 = €100.00 (OCO protegida)
+- 2ª: €493.52 × 0.1883 = €92.85 (sin protección)
+
+Total expuesto: 0.3889 BNB = riesgo de liquidación si ambos stops se ejecutaban.
+
+Acción tomada: Cerré manualmente la 2ª orden a mercado (€493.53, +€0.01).
+
+FIX requerido: Bloquear monitor_4h para NO ejecutar nueva orden si activo ya tiene posición abierta.
+Esto afecta también monitor_v2 (diario).
+
+
+## 8 julio 2026 — Fix implementado: Validador de posiciones
+
+Bug: monitor_4h ejecutó 3 compras BNB simultáneamente en el mismo día.
+Causa: No validaba si el activo ya tenía posición abierta.
+
+Fix: validador_posiciones.py + integrado en monitor_4h.py y monitor_v2.py.
+Antes de ejecutar compra, chequea operaciones_reales.csv por posiciones sin fecha_cierre.
+Si activo ya tiene posición abierta → SKIP + alerta Telegram.
+
+Testado: BNB/EUR con posición abierta → correctamente bloqueado.
+
+
+## 8 julio 2026 — Bugs detectados y corregidos (sesión completa)
+
+### Bug 1: Acumulación de posiciones
+Monitor_4h ejecutó 3 compras BNB simultáneamente.
+FIX: validador_posiciones.py integrado en monitor_4h.py y monitor_v2.py.
+
+### Bug 2: Cierres fantasma (evaluador_real.py)
+Evaluador usaba fallback "sin IDs": si fetch_open_orders devuelve 0, cerraba.
+Pero ccxt NO ve OCO manuales de Bitvavo → cerraba operaciones que siguen abiertas.
+FIX: Fallback eliminado. Operaciones sin IDs requieren cierre manual.
+
+### Bug 3: ccxt no ve OCO manuales de Bitvavo
+API de Bitvavo no expone órdenes OCO colocadas desde la web.
+Ejecutor.py coloca SL y TP como órdenes separadas (bloquean balance).
+Bitvavo web coloca OCO vinculadas (comparten balance).
+LIMITACION CONOCIDA: No hay fix por API. Operaciones futuras se colocan por ejecutor.py con IDs.
+
+### Operación actual
+BNB 0.2006 a €498.54 con OCO manual (SL €488.50 / TP €548.32).
+Cuando se ejecute: actualizar CSV manualmente.
+

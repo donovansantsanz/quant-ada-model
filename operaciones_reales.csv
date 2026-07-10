@@ -7,4 +7,6 @@ fecha_entrada,activo,sistema,precio_entrada,cantidad,capital_usdc,stop_loss,take
 2026-06-26 10:30,BTC/USDT,diario,59725.99,0.0006,35.84,58531.47,64504.07,3.8%,,,,,2026-06-26 14:00,58529.9115,-2.0,stop_loss,Ejecucion manual — saldo insuficiente automatico,binance
 2026-06-28 20:02,BNB/USDT,4h,549.15,0.182,100.0,549.1626,603.262,10.0%,,,,,2026-06-30 10:30,549.16,0.0,stop_loss,,binance
 2026-06-30 10:30,BTC/USDT,diario,59300.01,0.0006,37.75,58177.7098,64114.2108,3.8%,59365.01,-10.9,9719290827,9719290828,2026-06-30 14:00,58176.6,-1.89,stop_loss,Reabierta - cierre erroneo por huerfana de op antigua,binance
-2026-06-30 16:00,BNB/USDT,4h,544.13,0.183,100.0,534.0804,599.478,10.0%,544.98,-15.6,2793371882,2793371883,2026-07-02 10:37,555.0,2.0,cerrado_manual,Venta manual - Binance bloqueo ordenes UE (MiCA),binance
+2026-07-08 04:00,BNB/EUR,4h,498.54,0.2006,100.0,488.50,548.32,10.0%,498.47,1.4,,,,,,,OCO manual Bitvavo - cierre manual requerido,bitvavo
+2026-07-08 11:09,BNB/EUR,4h,493.52,0.1883,92.85,483.24,542.41,10.0%,493.1,8.5,,,2026-07-08 11:15,493.43,-0.02,cerrado_manual,Cierre manual - posicion duplicada,bitvavo
+2026-07-08 12:00,BNB/EUR,4h,496.56,0.1871,92.85,486.27,545.81,10.0%,496.19,7.5,,,2026-07-08 12:35,494.99,-0.31,cerrado_manual,Cierre manual - posicion duplicada,bitvavo

@@ -169,7 +169,11 @@ for simbolo in PARAMS:
     enviar_telegram(mensaje)
     print(f"     {d['decision']} | Score: {d['puntos']} | RSI: {d['rsi']:.1f}")
     if d["decision"] == "COMPRAR":
-        if MODO_TEST:
+        from validador_posiciones import tiene_posicion_abierta
+        if tiene_posicion_abierta(simbolo):
+            print(f"     ⚠️ {simbolo} ya tiene posicion abierta — SKIP")
+            enviar_telegram(f"⚠️ {simbolo} ya tiene posicion abierta — no se ejecuta nueva orden")
+        elif MODO_TEST:
             print(f"     [TEST] COMPRA simulada — no se ejecuta orden real")
         else:
             from ejecutor import ejecutar_compra

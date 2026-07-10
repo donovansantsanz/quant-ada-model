@@ -94,7 +94,12 @@ for simbolo in PARAMS_4H:
         msg = f"<b>SIGNAL 4H — {simbolo}</b>\n\nPrecio: <b>€{d['precio']:.4f}</b>\nScore: <b>{d['puntos']}/{d['umbral']}</b>\nRSI: <b>{d['rsi']:.1f}</b>\n\nStop: €{stop_precio} ({d['stop']:.0f}%)\nTake: €{take_precio} ({d['take']:.0f}%)\nHorizonte: {d['horizonte']}h\nKelly/4: {d['sizing']}\n\n<b>COMPRAR</b>"
         enviar_telegram(msg)
         print(f"     Telegram enviado")
-        if MODO_TEST:
+        # Validar que no hay posicion abierta para este activo
+        from validador_posiciones import tiene_posicion_abierta
+        if tiene_posicion_abierta(simbolo):
+            print(f"     ⚠️ {simbolo} ya tiene posicion abierta — SKIP")
+            enviar_telegram(f"⚠️ {simbolo} ya tiene posicion abierta — no se ejecuta nueva orden")
+        elif MODO_TEST:
             print(f"     [TEST] COMPRA simulada — no se ejecuta orden real")
         else:
             from ejecutor import ejecutar_compra

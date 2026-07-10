@@ -161,14 +161,7 @@ Stop nuevo: <b>€{nuevo_stop}</b>
 
             # ── MÉTODO ANTIGUO (operaciones sin IDs, por compatibilidad) ─
             else:
-                ordenes_abiertas = exchange.fetch_open_orders(simbolo)
-                if len(ordenes_abiertas) == 0:
-                    precio_cierre = exchange.fetch_ticker(simbolo)['last']
-                    resultado = 'stop_loss' if precio_cierre <= stop * 1.01 else ('take_profit' if precio_cierre >= take * 0.99 else 'cerrado')
-                    registrar_cierre(df, idx, precio_entrada, precio_cierre, cantidad, resultado, ahora)
-                    actualizaciones += 1
-                else:
-                    print(f"⏸ {simbolo_orig} (sin IDs) {len(ordenes_abiertas)} órdenes — sin acción")
+                print(f"⏸ {simbolo_orig} (sin IDs) — requiere cierre manual, no se auto-cierra")
 
         except Exception as e:
             print(f"⚠️ Error evaluando {simbolo_orig}: {e}")
