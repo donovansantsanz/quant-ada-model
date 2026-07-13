@@ -161,7 +161,18 @@ Stop nuevo: <b>€{nuevo_stop}</b>
 
             # ── MÉTODO ANTIGUO (operaciones sin IDs, por compatibilidad) ─
             else:
-                print(f"⏸ {simbolo_orig} (sin IDs) — requiere cierre manual, no se auto-cierra")
+                precio_actual = exchange.fetch_ticker(simbolo)['last']
+                nuevo_stop = round(precio_actual * 0.98, 4)
+                if nuevo_stop > stop * 1.02:
+                    print(f"🔼 {simbolo_orig} (sin IDs) trailing: stop actual €{stop} → sugerido €{nuevo_stop}")
+                    enviar_telegram(f"""<b>🔼 Trailing stop sugerido</b>
+{simbolo_orig}
+Precio actual: <b>€{precio_actual:.4f}</b>
+Stop actual: €{stop}
+Stop sugerido: <b>€{nuevo_stop}</b>
+<i>⚠️ Coloca manualmente en Bitvavo</i>""")
+                else:
+                    print(f"⏸ {simbolo_orig} (sin IDs) precio: €{precio_actual:.2f} | stop: €{stop} — sin cambios")
 
         except Exception as e:
             print(f"⚠️ Error evaluando {simbolo_orig}: {e}")
