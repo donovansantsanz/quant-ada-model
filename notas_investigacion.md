@@ -143,3 +143,24 @@ LIMITACION CONOCIDA: No hay fix por API. Operaciones futuras se colocan por ejec
 BNB 0.2006 a €498.54 con OCO manual (SL €488.50 / TP €548.32).
 Cuando se ejecute: actualizar CSV manualmente.
 
+
+## 13 julio 2026 — Análisis retrospectivo: 8 ops Binance (23-30 junio)
+
+**Resultado:** 8 ops, 1 win, 7 losses. Win rate 12.5%. Retorno -8.49%.
+Todas cerradas por stop loss. Ningún take profit alcanzado.
+
+**Contexto:** Mercado en caída pre-MiCA (Binance suspendió EU 1 julio).
+Período de 7 días con ventas sostenidas.
+
+**Diagnóstico:** El sistema detectó sobreventa correctamente (scores altos),
+pero el mercado NO rebotó — siguió cayendo. Mean-reversion en mercado en
+caída libre genera señales falsas (bull traps).
+
+**Implicación para hipótesis 2:** Confirma necesidad de filtro de régimen.
+En régimen ADVERSO (caída sostenida), el sistema debería NO operar.
+El detector de régimen actual habría clasificado este período como
+ADVERSO (precio < MA20 + MA20 slope negativo).
+
+**Dato clave:** Si el detector hubiera estado activo, las 8 ops se habrían
+bloqueado → retorno 0% en vez de -8.49%.
+
