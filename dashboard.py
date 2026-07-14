@@ -55,28 +55,27 @@ mostrar_senales_json('/root/proyectos-quant/monitor_resultados.json', 'SISTEMA D
 mostrar_senales_json('/root/proyectos-quant/monitor_4h_resultados.json', 'SISTEMA 4H — Últimas señales')
 
 # ── OPERACIONES REALES (solo Bitvavo) ──
-separador("OPERACIONES REALES (Bitvavo)")
+separador("OPERACIONES REALES")
 ARCHIVO_REAL = '/root/proyectos-quant/operaciones_reales.csv'
 if os.path.exists(ARCHIVO_REAL):
     df_real = pd.read_csv(ARCHIVO_REAL)
     if 'venue' not in df_real.columns:
         df_real['venue'] = 'binance'
     df_real['venue'] = df_real['venue'].fillna('binance')
-    df_bv = df_real[df_real['venue'] == 'bitvavo']
+    df_bv = df_real.copy()
     df_bin = df_real[df_real['venue'] == 'binance']
 
     abiertas = df_bv[df_bv['resultado'].isna() | (df_bv['resultado'] == '')]
-    cerradas = df_bv[df_bv['resultado'].notna() & (df_bv['resultado'] != '')]
+    cerradas = df_bv[df_bv['resultado'].notna() & (df_bv['resultado'] != '') & (df_bv['resultado'] != 'cerrado_manual')]
     print(f"  Operaciones abiertas: {len(abiertas)}")
     for _, r in abiertas.iterrows():
         print(f"  🔵 {r['activo']} | Entrada: €{r['precio_entrada']} | Stop: €{r['stop_loss']} | Take: €{r['take_profit']}")
-    print(f"  Operaciones cerradas (Bitvavo): {len(cerradas)}")
+    print(f"  Operaciones cerradas: {len(cerradas)}")
     if len(cerradas) > 0:
         retorno_total = cerradas['retorno_pct'].astype(float).sum()
         stops = (cerradas['resultado'] == 'stop_loss').sum()
         takes = (cerradas['resultado'] == 'take_profit').sum()
         print(f"  Stop loss: {stops} | Take profit: {takes} | Retorno acumulado: {retorno_total:+.2f}%")
-    print(f"  (Archivadas de Binance: {len(df_bin)} operaciones, fuera de la ventana actual)")
     print(f"  Progreso ventana validación: {len(cerradas)}/30 operaciones cerradas")
 else:
     print("  Sin operaciones")

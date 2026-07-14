@@ -26,8 +26,8 @@ df = pd.read_csv(ARCHIVO)
 if 'venue' not in df.columns:
     df['venue'] = 'binance'
 df['venue'] = df['venue'].fillna('binance')
-df = df[df['venue'] == 'bitvavo'].copy()
-cerradas = df[df['resultado'].notna() & (df['resultado'] != '')].copy()
+# Contar todas las operaciones (Binance + Bitvavo)
+cerradas = df[df['resultado'].notna() & (df['resultado'] != '') & (df['resultado'] != 'cerrado_manual')].copy()
 abiertas = df[df['resultado'].isna() | (df['resultado'] == '')]
 
 n_cerradas = len(cerradas)
