@@ -164,3 +164,33 @@ ADVERSO (precio < MA20 + MA20 slope negativo).
 **Dato clave:** Si el detector hubiera estado activo, las 8 ops se habrían
 bloqueado → retorno 0% en vez de -8.49%.
 
+
+## 14 julio 2026 — CORRECCIÓN: Backtest detector de régimen vs 8 ops Binance
+
+**Afirmación anterior (13 julio):** "Si el detector hubiera estado activo,
+las 8 ops se habrían bloqueado."
+
+**INCORRECTO.** Backtest real muestra que el detector clasificó TODAS las
+fechas como FAVORABLE o MIXTO. No habría bloqueado NINGUNA operación.
+
+**Razón:** Durante el crash pre-MiCA, precios estaban DEBAJO de MA20 con
+RSI bajo — exactamente las condiciones que el detector clasifica como
+"favorables para mean-reversion." Pero el mercado siguió cayendo.
+
+**Problema fundamental:** El detector actual distingue:
+- ADVERSO: precio > MA20 + RSI > 50 + trending up (momentum alcista)
+- FAVORABLE: precio < MA20 + RSI < 50 (sobreventa)
+
+Pero NO distingue entre:
+- Sobreventa CON rebote inminente (genuina mean-reversion)
+- Sobreventa EN caída libre (bull trap)
+
+**Hipótesis 3 — Detector de caída sostenida:**
+Necesitamos un indicador adicional que mida VELOCIDAD de caída.
+Posibles candidatos:
+- Retorno acumulado últimos 7 días (si < -10%, mercado en caída libre)
+- Pendiente de precio (no de MA20) — si precio cae más rápido que MA20
+- Volatilidad expandida + RSI bajando = pánico, no sobreventa normal
+
+NO implementar hasta cerrar validación actual.
+
