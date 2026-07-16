@@ -194,3 +194,12 @@ Posibles candidatos:
 
 NO implementar hasta cerrar validación actual.
 
+
+## 16 julio 2026 — Validador de posiciones: primera intervención real
+
+El validador bloqueó una señal COMPRAR de BNB/EUR (Score 7/6, RSI 29.6)
+mientras la posición del 8 julio seguía abierta. Sin el fix, se habría
+ejecutado una segunda compra duplicada (~€93) sin protección automática.
+
+Fix validado en producción.
+
