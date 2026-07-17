@@ -203,3 +203,62 @@ ejecutado una segunda compra duplicada (~€93) sin protección automática.
 
 Fix validado en producción.
 
+
+---
+
+## Formalización académica — Hipótesis 3 (17 julio 2026)
+
+### Pregunta de investigación
+
+¿Es posible distinguir estadísticamente, en el momento de la señal, entre
+sobreventa que precede a una reversión (mean-reversion genuina) y sobreventa
+dentro de una tendencia bajista sostenida (falsa señal / bull trap)?
+
+### Motivación empírica
+
+El backtest del 14 julio mostró que el detector de régimen actual (basado en
+posición vs MA20 + RSI) clasificó las 8 operaciones perdedoras del crash
+pre-MiCA como FAVORABLES. Es decir: las condiciones que el sistema considera
+óptimas para mean-reversion (precio < MA20, RSI bajo) estuvieron presentes
+durante toda la caída. El indicador de nivel (¿está barato?) no distingue de
+un indicador de velocidad (¿sigue cayendo con fuerza?).
+
+### Marco teórico (referencias a revisar)
+
+- Modelos de cambio de régimen (regime-switching): Hamilton (1989),
+  Markov-switching models aplicados a series financieras.
+- Literatura mean-reversion vs momentum: bajo qué condiciones cada estrategia
+  domina (Moskowitz, Asness, etc.).
+- Detección de rupturas estructurales (structural breaks) y su relación con
+  el fin de un régimen de reversión.
+
+### Hipótesis operativa
+
+Añadir un indicador de VELOCIDAD de caída (no solo de nivel) al scoring mejora
+la separación entre reversión genuina y trampa bajista. Candidatos a testear:
+1. Retorno acumulado 7d (umbral de "caída libre", p.ej. < -10%)
+2. Pendiente del precio vs pendiente de la MA20 (precio cae más rápido = peligro)
+3. Volatilidad expandida + RSI descendente (pánico, no sobreventa normal)
+
+### Diseño experimental propuesto
+
+1. Etiquetar retrospectivamente cada señal histórica como "reversión genuina"
+   (el precio subió al take antes de tocar el stop) o "falsa" (tocó el stop).
+2. Para cada señal, calcular los 3 indicadores candidatos.
+3. Evaluar poder discriminante (p. ej. AUC / separación de distribuciones)
+   de cada indicador entre las dos clases.
+4. Validar walk-forward: entrenar el umbral en un periodo, testear en otro.
+
+### Cautela metodológica
+
+Muestra actual insuficiente (9 ops cerradas). Este experimento requiere
+acumular operaciones o usar señales históricas simuladas (con cuidado del
+lookahead bias). NO implementar en producción hasta cerrar la ventana de
+validación actual.
+
+### Conexión con el TFG
+
+Candidato directo a pregunta central del TFG:
+"Detección de régimen para estrategias de reversión a la media en cripto:
+comparación mean-reversion vs momentum vs híbrido con validación walk-forward."
+
