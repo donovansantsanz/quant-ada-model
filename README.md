@@ -81,7 +81,7 @@ with automatic execution, Telegram alerts, and real capital deployed.
 - stopLossLimit + takeProfitLimit orders placed automatically after every buy
 - Trailing stop: 2% below current price when position moves favorably
 
-## Scripts (22)
+## Scripts (27)
 
 | Script | Description |
 |--------|-------------|
@@ -89,12 +89,17 @@ with automatic execution, Telegram alerts, and real capital deployed.
 | config.py | Single source of parameters — daily system |
 | config_4h.py | Parameters — 4H system |
 | monitor_v2.py | Daily monitor — scores, BTC filter, JSON output |
-| monitor_4h.py | 4H monitor — scores, JSON output |
+| monitor_4h.py | 4H monitor — scores, JSON output, position validation |
+| detector_regimen_auto.py | Daily regime detector — downloads fresh data, classifies FAVORABLE/MIXTO/ADVERSO, Telegram |
+| monitor_edge_return.py | Alerts when an asset returns to FAVORABLE regime |
+| validador_posiciones.py | Checks real Bitvavo balance to prevent duplicate positions |
+| descargar_datos.py | Downloads 90d OHLCV from Bitvavo for regime analysis |
+| graficos.py | Equity curve + return distribution PNGs |
 | ejecutor.py | Automatic execution — buy + stopLossLimit + takeProfitLimit |
 | evaluador_real.py | Hourly evaluator — ID matching, orphan cancel, trailing stop, P&L |
 | monitor_salud.py | Weekly health check — rolling 90d Kelly vs full-sample |
-| paper_trading.py | Daily paper trading — signal logging |
-| paper_trading_4h.py | 4H paper trading — signal logging |
+| paper_trading.py | Daily paper trading — signal logging (archived, superseded by live) |
+| paper_trading_4h.py | 4H paper trading — signal logging (archived, superseded by live) |
 | walk_forward.py | Out-of-sample validation — daily system |
 | screener_activos.py | Asset screener with liquidity filter + multiple testing correction |
 | checklist_expansion.py | Objective criteria for capital expansion (Bitvavo window only) |
@@ -116,7 +121,7 @@ with automatic execution, Telegram alerts, and real capital deployed.
 | Exchange | Bitvavo Spot (EUR pairs, MiCA-licensed) |
 | Data & orders | ccxt library |
 | Notifications | Telegram bot |
-| Scheduling | cron (4 active tasks) |
+| Scheduling | cron (5 active tasks) |
 | Version control | GitHub |
 
 ## Capital Expansion Checklist
