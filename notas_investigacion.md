@@ -374,3 +374,33 @@ tocar el scoring.
    evitadas.
 3. NO tocar hasta cerrar la ventana de validacion (9/30 ops).
 
+
+### Matiz importante: los parametros de BNB estan acoplados
+
+Configuracion completa (config.py):
+
+| Activo | Umbral | Stop | Take | Kelly | Filtro BTC |
+|--------|--------|------|------|-------|------------|
+| ADA    | 5      | 3%   | 8%   | 16.9% | Activo     |
+| SOL    | 6      | 3%   | 10%  | 23.1% | Inactivo   |
+| ETH    | 4      | 3%   | 10%  | 18.3% | Activo     |
+| BNB    | 7      | 2%   | 10%  | 28.4% | Activo     |
+| BTC    | 5      | 2%   | 8%   | 15.1% | Inactivo   |
+
+BNB es el activo mas restrictivo en tres frentes simultaneos: umbral mas alto
+(7), stop mas ajustado (2%) y filtro BTC activo. Y es donde mas se opera
+(el sistema 4h es exclusivamente BNB).
+
+El ratio b de BNB es 5:1 (take 10% / stop 2%), el mas asimetrico del sistema.
+Eso justifica su Kelly alto (28.4%): con esa asimetria se puede acertar poco
+y seguir siendo rentable. Pero un stop del 2% en un activo volatil salta con
+facilidad, especialmente dado que las señales llegan en dia -3 antes del suelo.
+
+CAUTELA CRITICA para el proximo ciclo de walk-forward:
+Estos parametros salieron de un grid search que optimizaba el CONJUNTO
+(umbral + stop + take simultaneamente). El stop de 2% puede funcionar
+precisamente PORQUE el umbral 7 filtra las señales mas dudosas. Bajar el
+umbral sin reajustar el stop podria empeorar el resultado, no mejorarlo.
+
+Al re-optimizar: probar combinaciones completas, nunca parametros sueltos.
+
