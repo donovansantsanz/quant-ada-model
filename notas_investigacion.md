@@ -322,3 +322,55 @@ compensa el coste de oportunidad de las señales perdidas?
 
 NO TOCAR hasta cerrar la ventana de validacion actual (9/30 ops).
 
+
+---
+
+## 18 julio 2026 — Actualizacion Hipotesis 1: convergencia de evidencia sobre BNB
+
+### Analisis de suelos re-ejecutado (datos Bitvavo/EUR)
+
+Relacion umbral vs captura de suelos, casi perfectamente monotona:
+
+| Activo | Umbral | Suelos captados | Tasa |
+|--------|--------|-----------------|------|
+| ETH    | 4      | 7/7             | 100% |
+| BTC    | 5      | 3/3             | 100% |
+| ADA    | 5      | 6/7             | 86%  |
+| SOL    | 6      | 3/6             | 50%  |
+| BNB    | 7      | 0/3             | 0%   |
+
+BNB fallo los 3 suelos con scores de 5, 6 y 6. El sistema detecto las tres
+oportunidades pero el umbral 7 las bloqueo por 1-2 puntos.
+
+### Convergencia con Hipotesis 4
+
+Dos analisis independientes apuntan a que la configuracion de BNB es
+demasiado restrictiva:
+
+1. Stress test: el filtro BTC perjudica a BNB en 4/4 periodos historicos
+2. Analisis de suelos: el umbral 7 pierde 3/3 suelos
+
+Es ademas el activo donde mas se opera (el sistema 4h es exclusivamente BNB).
+
+### Hallazgo adicional: timing de las señales
+
+Practicamente todas las señales caen en dia -3 respecto al suelo real.
+El sistema no llega tarde: llega temprano y aguanta la caida restante.
+
+Esto explica la alta frecuencia de stops: se entra antes de que la caida
+termine, y un stop de 2-3% salta facilmente en esos 3 dias.
+
+Conexion directa con Hipotesis 3: si se pudiera distinguir "quedan 3 dias
+de caida" de "el suelo es hoy", el sistema mejoraria sustancialmente sin
+tocar el scoring.
+
+### Cautelas (se mantienen las del 3 julio)
+
+1. Este analisis mide PRECIO, no rentabilidad. "Capto el suelo" != "habria
+   ganado": tras el suelo el precio debe alcanzar el take antes que el stop.
+2. El umbral 7 salio de grid search maximizando Sharpe. Puede existir
+   precisamente para filtrar señales falsas costosas en otras partes del
+   historico. Este analisis solo ve los suelos perdidos, no las trampas
+   evitadas.
+3. NO tocar hasta cerrar la ventana de validacion (9/30 ops).
+
