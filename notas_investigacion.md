@@ -262,3 +262,63 @@ Candidato directo a pregunta central del TFG:
 "Detección de régimen para estrategias de reversión a la media en cripto:
 comparación mean-reversion vs momentum vs híbrido con validación walk-forward."
 
+
+---
+
+## 18 julio 2026 — Hipótesis 4: ¿aporta valor el filtro BTC?
+
+### Origen
+
+Stress test ejecutado sobre periodos históricos (crash mayo 2021, bear market
+2022, colapso FTX nov 2022, bull market 2023, mercado actual), comparando el
+Sharpe del sistema con y sin filtro BTC activado.
+
+### Resultado
+
+Balance por activo (solo los que tienen el filtro ACTIVO en produccion):
+
+| Activo | Periodos donde ayuda | Periodos donde perjudica |
+|--------|---------------------|-------------------------|
+| ADA    | 2                   | 2                       |
+| ETH    | 3                   | 2                       |
+| BNB    | 0                   | 4                       |
+
+BNB es el caso extremo: el filtro perjudica en los 4 periodos medidos.
+Peor caso: bull market 2023, Sharpe pasa de -2.54 a -10.94 (-8.40).
+
+En el periodo "mercado actual" el filtro perjudica en 4 de 5 activos,
+bloqueando entre 33 y 107 señales por activo.
+
+### Pregunta de investigacion
+
+El filtro BTC (bloquear señales si BTC cae >5% en 3 dias) tiene una logica
+macro defendible: la correlacion en cripto hace que una caida de BTC arrastre
+al resto. Pero empiricamente parece bloquear demasiadas señales buenas junto
+con las malas.
+
+¿Aporta el filtro valor neto, o su beneficio teorico (proteccion macro) no
+compensa el coste de oportunidad de las señales perdidas?
+
+### Sub-preguntas a testear
+
+1. ¿Deberia desactivarse el filtro en BNB especificamente? (0/4 a favor)
+2. ¿Es el umbral -5% en 3d demasiado agresivo? Testear -8%, -10%.
+3. ¿Deberia el filtro reducir el sizing en vez de bloquear por completo?
+4. Analisis condicional: de las señales bloqueadas, ¿que porcentaje habria
+   terminado en stop vs en take? (el stress test solo mide el agregado)
+
+### Cautelas metodologicas
+
+1. Los Sharpe del stress test provienen del mismo motor de simulacion que
+   produce valores optimistas (Sharpe 11-16 no son realistas en trading real).
+   Comparar diferencias relativas, no valores absolutos.
+2. El stress test mide Sharpe agregado. Un filtro puede empeorar el Sharpe y
+   aun asi proteger de la ruina en el peor escenario (tail risk), lo cual no
+   se captura aqui.
+3. Precedente de la Hipotesis 3: una conclusion que parecia obvia resulto
+   incorrecta al backtestearla. No asumir.
+
+### Estado
+
+NO TOCAR hasta cerrar la ventana de validacion actual (9/30 ops).
+
