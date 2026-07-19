@@ -404,3 +404,75 @@ umbral sin reajustar el stop podria empeorar el resultado, no mejorarlo.
 
 Al re-optimizar: probar combinaciones completas, nunca parametros sueltos.
 
+
+---
+
+## 19 julio 2026 — Marco teórico: Hipótesis 3 y literatura de detección de regímenes
+
+### Contexto
+
+La Hipótesis 3 busca distinguir sobreventa que precede a rebote (mean-reversion
+genuina) de sobreventa en caída libre (bull trap). Esta pregunta tiene nombre
+propio en la literatura: changepoint detection aplicado a régimen de mercado.
+
+### Literatura relevante (por orden de prioridad)
+
+**1. Hamilton (1989) — El fundacional**
+Hamilton, J.D. (1989). A new approach to the economic analysis of nonstationary
+time series and the business cycle. Econometrica 57, 357–384.
+
+Introduce el modelo Markov-switching: el régimen (calma vs turbulencia) es una
+variable OCULTA que no se observa directamente, pero puede inferirse
+probabilísticamente de los precios. El sistema actual usa reglas fijas
+(precio < MA20 + RSI < 50 = FAVORABLE). Un modelo Markov-switching estima
+probabilidades continuas de estar en cada régimen, sin umbrales arbitrarios.
+
+**2. Filardo (1994) — Probabilidades de transición variables en el tiempo (TVTP)**
+Filardo, A.J. (1994). Business-cycle phases and their transitional dynamics.
+Journal of Business & Economic Statistics 12, 299–308.
+
+Extiende Hamilton permitiendo que la probabilidad de cambiar de régimen dependa
+de variables observadas (covariables). Esto es exactamente la Hipótesis 3:
+usar retorno 7d o pendiente del precio como variable que modula la probabilidad
+de que el régimen cambie. El marco matemático ya existe.
+
+**3. Wood, Roberts & Zohren (2021) — El más cercano al problema**
+arXiv:2105.13727 — "Slow Momentum with Fast Reversion"
+
+Insertan un módulo de detección de changepoints en una estrategia de momentum.
+El módulo produce una PUNTUACION DE SEVERIDAD del cambio (no un sí/no),
+mejorando el Sharpe en un tercio. El problema es análogo al nuestro con el
+signo cambiado: ellos tienen momentum que falla en giros, nosotros tenemos
+mean-reversion que falla en caída libre. LECTURA PRIORITARIA — acceso libre.
+
+**4. Evidencia en cripto**
+Literatura reciente muestra que en cripto, momentum domina en tendencias
+alcistas de baja volatilidad, mientras mean-reversion resulta valiosa en
+mercados de alta volatilidad y periodos de transición. El Sharpe realista
+en trabajo publicado con estrategias combinadas es ~1.71 (no 8-11).
+
+### Implicación práctica inmediata
+
+statsmodels (Python) implementa MarkovRegression y MarkovAutoregression.
+Se puede ajustar un modelo de dos regimenes a datos de BNB en pocas lineas
+y comparar sus estados estimados con el clasificador actual (MA20 + RSI).
+Esto seria un experimento real documentable para el TFG.
+
+### Conexion con el TFG
+
+El titulo candidato del TFG conecta directamente:
+"Deteccion de regimen para estrategias de reversion a la media en cripto:
+comparacion mean-reversion vs momentum vs hibrido con validacion walk-forward"
+
+La seccion de estado del arte ya tiene base:
+1. Hamilton (1989): modelos de cambio de regimen
+2. Filardo (1994): TVTP — regimen dependiente de covariables
+3. Wood et al. (2021): changepoint detection + estrategia adaptativa
+4. Literatura cripto: comportamiento diferencial por regimen
+
+### Siguiente paso (cuando se cierre la validacion actual)
+
+Ajustar MarkovRegression de dos regimenes a datos historicos de BNB.
+Comparar estados estimados con clasificacion actual.
+¿Coinciden? ¿Mejora la separacion entre reversiones genuinas y trampas?
+
