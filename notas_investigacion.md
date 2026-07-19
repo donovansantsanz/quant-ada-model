@@ -476,3 +476,78 @@ Ajustar MarkovRegression de dos regimenes a datos historicos de BNB.
 Comparar estados estimados con clasificacion actual.
 ¿Coinciden? ¿Mejora la separacion entre reversiones genuinas y trampas?
 
+
+---
+
+## 19 julio 2026 — Experimento 1: Markov-Switching en BNB/EUR
+
+### Setup
+
+Modelo: MarkovRegression (statsmodels) con 2 regímenes y varianza variable.
+Datos: 364 días BNB/EUR (2025-07-21 → 2026-07-19).
+Variable modelada: retornos logarítmicos diarios.
+
+### Regímenes detectados
+
+| Régimen | Retorno anualizado | Volatilidad anual | Persistencia |
+|---------|-------------------|-------------------|--------------|
+| 0 (CALMA) | +2.3% | 26.9% | 96.0% |
+| 1 (TURBULENTO) | -95.2% | 77.3% | 85.1% |
+
+El régimen CALMA es muy persistente (96%) — una vez en calma, tiende a quedarse.
+El régimen TURBULENTO es menos persistente (85%) — los crashes son intensos pero acaban.
+
+### Hallazgo 1: acuerdo con clasificador actual = 48.7%
+
+El clasificador actual (precio < MA20 + RSI < 50) y el modelo Markov
+acuerdan solo el 48.7% de los dias. Practicamente aleatorio.
+Interpretacion: miden cosas distintas. Son potencialmente COMPLEMENTARIOS,
+no redundantes. Un clasificador combinado podria ser mas robusto.
+
+### Hallazgo 2: señales de enero 2026 (el caso clave)
+
+Señales COMPRAR de BNB durante el crash de enero 2026:
+
+| Fecha | Precio | P(turbulento) |
+|-------|--------|---------------|
+| 2026-01-25 | €729 | 5% (CALMA) |
+| 2026-01-29 | €725 | 52% (TURBUL) |
+| 2026-01-31 | €660 | 100% (TURBUL) |
+| 2026-02-03 | €638 | 98% (TURBUL) |
+
+El modelo detecto el cambio de regimen ANTES de que el precio colapsara:
+ya el 29 de enero daba 52% de turbulento. El precio cayo -12.5% en esa
+ventana. El clasificador actual habria dado COMPRAR todo el periodo.
+
+Comparacion: señales de noviembre 2025 (CALMA 86-92%) y abril 2026 (CALMA
+92%) — contextos donde la mean-reversion habria funcionado mejor.
+
+### Conclusion preliminar
+
+El modelo Markov SI distingue los dos casos de la Hipotesis 3:
+- Señales en CALMA → contexto donde mean-reversion tiende a funcionar
+- Señales en TURBULENTO → caida libre, bull trap probable
+
+Esto responde afirmativamente la pregunta principal de la Hipotesis 3.
+
+### Cautela critica: sesgo de retrospectiva (look-ahead bias)
+
+Este experimento ajusta el modelo sobre TODOS los datos antes de clasificar.
+En produccion real, el modelo solo veria el pasado. La señal de turbulencia
+de enero puede llegar en retrospectiva mas clara que en tiempo real.
+
+SIGUIENTE PASO: re-ejecutar en modo rolling (ajustar el modelo solo con
+datos hasta el dia i, predecir el regimen del dia i+1). Si la señal de
+turbulencia de enero sigue apareciendo en tiempo real, el resultado es
+robusto. Si desaparece, era retrospectiva.
+
+### Implicacion para el sistema (futura, post-validacion)
+
+Añadir como filtro adicional: si P(turbulento) > umbral (ej. 40%), no
+ejecutar señal aunque el score llegue al umbral. Testear en walk-forward
+antes de implementar en produccion.
+
+### Archivo
+
+Script: ~/proyectos-quant/experimento_markov_bnb.py
+
