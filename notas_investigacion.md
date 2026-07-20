@@ -806,3 +806,64 @@ La distincion es importante:
 descubriendo que el problema es la arquitectura de salida y la deteccion
 de regimen. Es un arco de investigacion completo con conclusion no obvia.
 
+
+---
+
+## 20 julio 2026 — Experimento 3b: Velocidad de caida en ETH/EUR
+
+### Motivacion
+
+Los Experimentos 3-5 se centraron exclusivamente en BNB. Para saber si
+las conclusiones generalizan, se replico el analisis en ETH/EUR.
+
+### Parametros ETH vs BNB
+
+| | BNB | ETH |
+|---|---|---|
+| Umbral | 7 | 4 |
+| Stop | 2% | 3% |
+| Take | 10% | 10% |
+
+### Resultado: el filtro SI mejora en ETH (ano completo)
+
+| Filtro | Sharpe | Ops |
+|--------|--------|-----|
+| Sin filtro | 2.18 | 142 |
+| ret7d < -10% | 2.61 | 99 |
+| vol5d > p80 | 3.02 | 100 |
+
+El filtro de velocidad de caida MEJORA el Sharpe en ETH.
+Contraste directo con BNB donde no mejoraba fuera de muestra.
+
+### Por que ETH reacciona diferente
+
+1. Stop mas amplio (3% vs 2%): ETH sobrevive mejor la volatilidad
+   antes de tocar el stop. El filtro puede discriminar porque hay
+   operaciones que sobreviven y operaciones que no.
+
+2. Umbral mas bajo (4 vs 7): ETH genera 142 señales vs 67 de BNB.
+   Mayor variedad de condiciones — algunas en caida libre (alertas
+   altas) y otras en correcciones normales (sin alertas). El filtro
+   separa mejor los dos grupos.
+
+3. En BNB con umbral 7, todas las señales son en extremos maximos —
+   condiciones similares, todas terminan en stop en caidas sostenidas.
+
+### Conclusion general (BNB + ETH)
+
+La efectividad del filtro de velocidad de caida depende de:
+1. La amplitud del stop (mas amplio = mas margen para discriminar)
+2. La variedad de condiciones que genera el umbral (mas bajo = mas variedad)
+
+ETH con stop 3% y umbral 4 responde bien al filtro.
+BNB con stop 2% y umbral 7 no responde (todas stops en caidas sostenidas).
+
+Implicacion para el TFG: la Hipotesis 3 no tiene una respuesta universal.
+La solucion optima depende de los parametros especificos de cada activo.
+Esto añade riqueza al analisis comparativo.
+
+### Pendiente
+
+Replicar en ADA (umbral 5, stop 3%) y SOL (umbral 6, stop 3%) para
+completar el cuadro. Especialmente ADA que capto 6/7 suelos.
+
