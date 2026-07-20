@@ -867,3 +867,70 @@ Esto añade riqueza al analisis comparativo.
 Replicar en ADA (umbral 5, stop 3%) y SOL (umbral 6, stop 3%) para
 completar el cuadro. Especialmente ADA que capto 6/7 suelos.
 
+
+---
+
+## 20 julio 2026 — Experimento 3c: ADA y SOL (cuadro completo)
+
+### Resultados ADA/EUR (umbral=5, stop=3%, take=8%)
+
+| Filtro | Sharpe | Ops |
+|--------|--------|-----|
+| Sin filtro | 1.11 | 105 |
+| ret7d < -5% | -0.83 | 40 |
+| vol5d > p70 | 1.21 | 65 |
+| vol5d > p80 | 1.21 | 78 |
+
+ret7d empeora claramente. vol5d mejora marginalmente.
+
+### Resultados SOL/EUR (umbral=6, stop=3%, take=10%)
+
+| Filtro | Sharpe | Ops |
+|--------|--------|-----|
+| Sin filtro | 4.55 | 87 |
+| ret7d < -10% | 4.34 | 58 |
+| vol5d > p70 | 6.79 | 41 |
+| vol5d > p80 | 5.89 | 56 |
+
+vol5d > p70 mejora sustancialmente: 4.55 → 6.79 (+2.24).
+La mayor mejora absoluta de los 4 activos.
+
+### Cuadro comparativo final (4 activos)
+
+| Activo | Umbral | Stop | Sharpe_base | vol5d_p70 | vol5d_p80 | ret7d_10% |
+|--------|--------|------|-------------|-----------|-----------|-----------|
+| BNB | 7 | 2% | 7.15 | empeora | empeora | empeora |
+| ETH | 4 | 3% | 2.18 | +0.64 | +0.84 | +0.43 |
+| ADA | 5 | 3% | 1.11 | +0.10 | +0.10 | empeora |
+| SOL | 6 | 3% | 4.55 | **+2.24** | +1.34 | empeora |
+
+### Patron emergente
+
+1. vol5d mejora en 3/4 activos (ETH, SOL, ADA marginalmente)
+2. ret7d empeora en 3/4 activos (solo ETH mejora)
+3. BNB es el unico donde ambos filtros perjudican
+4. La mayor mejora es SOL con vol5d > p70 (+2.24 Sharpe)
+
+### Interpretacion
+
+El filtro vol5d captura bien los momentos de panico extremo.
+En activos con stop 3% hay suficiente margen para sobrevivir
+la volatilidad inicial y beneficiarse de la discriminacion.
+En BNB con stop 2%, el stop salta antes de que el filtro ayude.
+
+La efectividad del filtro depende principalmente de:
+- Stop amplio (3%) > Stop ajustado (2%)
+- No depende linealmente del umbral
+
+### Conclusion de la Hipotesis 3 (ciclo completo)
+
+Tras 6 experimentos (3, 3b, 3c, 4, 4b, 5):
+
+El filtro de volatilidad (vol5d > p70-80) es el candidato mas robusto.
+Mejora en 3/4 activos en muestra. Pendiente validacion walk-forward
+por activo antes de implementar en produccion.
+
+BNB necesita tratamiento especial: su stop de 2% lo hace incompatible
+con el filtro de volatilidad. La solucion para BNB puede ser diferente
+(ampliar stop, bajar umbral, o pausar en regimenes adversos).
+
