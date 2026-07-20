@@ -551,3 +551,58 @@ antes de implementar en produccion.
 
 Script: ~/proyectos-quant/experimento_markov_bnb.py
 
+
+---
+
+## 20 julio 2026 — Experimento 2: Markov Rolling (sin lookahead bias)
+
+### Setup
+
+Mismo modelo que Experimento 1 pero en modo rolling:
+en cada dia i, el modelo se ajusta solo con datos hasta i-1.
+Ventana minima: 90 dias. Predice regimen del dia i sin ver el futuro.
+
+### Resultado principal: el modelo rolling llega TARDE
+
+Comparacion caso clave enero 2026:
+
+| Fecha | Precio | P(turb) retrospectivo | P(turb) rolling |
+|-------|--------|-----------------------|-----------------|
+| 2026-01-25 | €729 | 5% CALMA | 5% CALMA |
+| 2026-01-29 | €725 | 52% TURBUL | 4% CALMA |
+| 2026-01-31 | €660 | 100% TURBUL | 8% CALMA |
+| 2026-02-01 | €640 | 100% TURBUL | 100% TURBUL |
+
+El modelo retrospectivo detecta el cambio el 29 enero.
+El rolling lo detecta el 1 febrero — cuando el precio ya cayo -12%.
+
+### Explicacion
+
+El modelo necesita observar varios dias de alta volatilidad para actualizar
+su estimacion del regimen. Un solo dia de caida parece ruido. La señal
+llega despues del crash, no antes ni durante.
+
+### Conclusion: resultado negativo pero informativo
+
+El Markov-switching puro sobre retornos NO sirve como filtro en tiempo real
+para este problema. Detecta el regimen turbulento retrospectivamente pero
+no en tiempo util para evitar entrar en la trampa.
+
+### Siguientes experimentos a probar (post-validacion)
+
+1. Usar volatilidad realizada (rolling std 5d) en vez de retornos — la
+   volatilidad explota antes de que el precio colapse del todo
+2. Ventana mas corta (30-60 dias) — mas reactivo, menos estable
+3. Variables adicionales: retorno acumulado 7d (Hipotesis 3 original)
+4. Modelo hibrido: Markov + indicador de velocidad de caida
+
+### Valor del experimento
+
+Resultado negativo que cierra una via y abre tres nuevas.
+Es investigacion honesta: saber que NO funciona es tan valioso como
+saber que SI funciona. Citable en TFG como experimento con resultado nulo.
+
+### Archivos
+
+Script: ~/proyectos-quant/experimento_markov_rolling.py
+
