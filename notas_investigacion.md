@@ -606,3 +606,75 @@ saber que SI funciona. Citable en TFG como experimento con resultado nulo.
 
 Script: ~/proyectos-quant/experimento_markov_rolling.py
 
+
+---
+
+## 20 julio 2026 — Experimento 3: Velocidad de caida como filtro
+
+### Setup
+
+Dos indicadores de velocidad de caida calculados en tiempo real:
+- ret7d: retorno acumulado ultimos 7 dias
+- vol5d_pct: percentil historico de la volatilidad rolling 5 dias
+
+Ambos calculables sin lookahead bias.
+
+### Resultado principal: FUNCIONA en tiempo real
+
+A diferencia del Markov rolling (Experimento 2), estos indicadores
+detectan el cambio de regimen SIN necesitar datos futuros.
+
+Caso clave enero 2026:
+
+| Fecha | Precio | ret7d | vol5d_pct | Decision |
+|-------|--------|-------|-----------|---------|
+| 2026-01-25 | €729 | -9.0% | 19% | ✅ pasaria |
+| 2026-01-29 | €725 | -3.9% | 70% | ✅ pasaria |
+| 2026-01-31 | €660 | -11.9% | 88% | BLOQUEADO |
+| 2026-02-01 | €640 | -12.2% | 86% | BLOQUEADO |
+| 2026-02-03 | €638 | -14.7% | 89% | BLOQUEADO |
+
+### Impacto de los filtros (sobre 17 señales historicas)
+
+ret7d < -10%: bloquea 4/17 (24%) — solo señales en caida acelerada
+vol5d > p80:  bloquea 4/17 (24%) — exactamente las mismas 4 señales
+
+Los filtros son concordantes: identifican el mismo subconjunto de señales.
+
+### Discriminacion correcta
+
+Las señales de noviembre 2025 (ret7d -1.5% a -9.8%) NO son bloqueadas.
+BNB estaba cayendo pero moderadamente — y eventualmente reboto.
+El filtro deja pasar caidas moderadas y bloquea caidas aceleradas.
+Eso es exactamente la discriminacion buscada en la Hipotesis 3.
+
+### Conclusion
+
+Los indicadores simples de velocidad de caida superan al modelo
+Markov-switching en tiempo real. Mas simples, mas reactivos,
+mas interpretables.
+
+Umbrales candidatos para walk-forward:
+- ret7d < -10% (bloquea 24% de señales, todas en caida libre)
+- vol5d > p80  (mismo efecto, confirmacion cruzada)
+- Combinacion: bloquear si AMBOS se activan (reduce falsos positivos)
+
+### Jerarquia de los 3 experimentos
+
+1. Markov retrospectivo: detecta turbulencia (solo en retrospectiva)
+2. Markov rolling: llega tarde (12% ya perdido antes de detectar)
+3. Velocidad de caida: FUNCIONA en tiempo real — GANADOR
+
+### Siguiente paso
+
+Validar en walk-forward formal:
+- Periodo train: definir umbrales optimos (ret7d, vol5d)
+- Periodo test: comprobar que la mejora se mantiene fuera de muestra
+- Metrica: Sharpe con filtro vs sin filtro, operaciones bloqueadas correctamente
+
+NO implementar en produccion hasta cerrar validacion actual (10/30 ops).
+
+### Archivo
+
+Script: ~/proyectos-quant/experimento_velocidad_caida.py
+
