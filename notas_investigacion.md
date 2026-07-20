@@ -678,3 +678,63 @@ NO implementar en produccion hasta cerrar validacion actual (10/30 ops).
 
 Script: ~/proyectos-quant/experimento_velocidad_caida.py
 
+
+---
+
+## 20 julio 2026 — Experimento 4: Walk-Forward del filtro (resultado final)
+
+### Setup
+
+Train: jul-oct 2025 (103 dias)
+Test: nov 2025 - feb 2026 (120 dias, periodo con señales reales)
+
+### Resultado: el filtro NO mejora fuera de muestra
+
+En el periodo de test, TODAS las 16 operaciones terminaron en STOP -2%.
+Sin excepcion. El filtro (vol5d > p70) bloqueo 8 señales, pero tanto las
+bloqueadas como las no bloqueadas habrian terminado en stop.
+
+El Sharpe -999 en el test con filtro se debe a que las 8 operaciones
+restantes tienen todas el mismo retorno (-2%), std = 0.
+
+### Causa raiz
+
+Entre nov 2025 y feb 2026, BNB cayo de €826 a €638 (-23%) de forma
+sostenida. No hubo ningun rebote que alcanzara el take profit (+10%).
+El sistema detecto sobreventa correctamente, pero el mercado siguio
+cayendo mas alla del stop antes de recuperarse.
+
+El filtro de velocidad de caida no resuelve este problema:
+- Bloquea señales en caida rapida ✅ (jan-feb 2026)
+- Pero deja pasar señales en caida moderada que tambien son stops ❌ (nov 2025)
+- En caidas sostenidas del -23%, el stop de 2% es demasiado ajustado
+
+### Conclusion del ciclo de 4 experimentos (Hipotesis 3)
+
+| Experimento | Resultado |
+|-------------|-----------|
+| 1: Markov retrospectivo | Detecta turbulencia ✅ (solo retrospectiva) |
+| 2: Markov rolling | Llega tarde ❌ |
+| 3: Velocidad de caida | Discrimina en muestra ✅ |
+| 4: Walk-forward filtro | No mejora fuera de muestra ❌ |
+
+### Reformulacion de la Hipotesis 3
+
+El problema no es solo CUANDO entrar (filtrar señales) sino COMO salir.
+En caidas sostenidas del 20%+, un stop del 2% no sobrevive el camino
+hasta el rebote. La hipotesis deberia incluir:
+
+1. Filtro de entrada (velocidad de caida) — probado, resultado mixto
+2. Stop adaptativo (mas amplio en regimenes de alta volatilidad)
+3. O directamente no operar en regimenes de caida sostenida
+
+Conecta con Hipotesis 2 (momentum + detector de regimen):
+si el detector clasifica CAIDA SOSTENIDA, la accion correcta puede ser
+no operar en absoluto, no filtrar señales individuales.
+
+### Valor de investigacion
+
+4 experimentos con resultados mixtos: 2 positivos en muestra, 2 negativos
+fuera de muestra. Es investigacion honesta. El camino hacia una solucion
+robusta requiere abordar simultaneamente entrada Y gestion de la salida.
+
