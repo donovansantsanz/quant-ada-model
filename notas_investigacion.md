@@ -738,3 +738,71 @@ no operar en absoluto, no filtrar señales individuales.
 fuera de muestra. Es investigacion honesta. El camino hacia una solucion
 robusta requiere abordar simultaneamente entrada Y gestion de la salida.
 
+
+---
+
+## 20 julio 2026 — Experimento 5: Stop adaptativo (cierre Hipotesis 3)
+
+### Setup
+
+Comparacion stop fijo (2%) vs stop adaptativo basado en:
+- Volatilidad rolling 14d (vol14d × multiplicador)
+- ATR × multiplicador
+
+### Resultado año completo
+
+| Config | Sharpe | Win% |
+|--------|--------|------|
+| Stop fijo 2% | 7.15 | 43.3% |
+| ATR × 1.5 | 8.10 | 53.7% |
+| Vol14d × 1.5 | 7.99 | 56.7% |
+
+Mejora marginal con stop adaptativo en el año completo.
+
+### Resultado periodo problematico (nov 2025 - feb 2026)
+
+| Config | Sharpe |
+|--------|--------|
+| Stop fijo 2% | -7.25 |
+| Vol14d × 1.5 | -11.73 (peor) |
+| Vol14d × 3.0 | -15.92 (aun peor) |
+
+Cuanto mas amplio el stop, peor el resultado. El stop adaptativo
+EMPEORA el resultado en el peor regimen.
+
+### Hallazgo definitivo: el take profit era inalcanzable
+
+Analisis de caidas maximas en nov 2025:
+
+| Señal | Caida max | Subida max | Take |
+|-------|-----------|------------|------|
+| 11 nov €827 | -13.5% | +0.0% | NUNCA |
+| 12 nov €822 | -13.1% | +0.0% | NUNCA |
+| 14 nov €786 | -9.1% | +2.4% | NUNCA |
+| 21 nov €721 | -1.8% | +9.7% | NUNCA |
+
+Las señales del 11-17 nov NUNCA subieron +10% desde el punto de
+entrada. Ni con stop infinito habrian ganado: el precio no subio.
+
+### Conclusion del ciclo completo (Hipotesis 3, 5 experimentos)
+
+El sistema tiene un problema estructural en caidas sostenidas del 20%+:
+ni el filtro de entrada (Exp 3-4) ni el stop adaptativo (Exp 5)
+resuelven el problema porque el take profit es inalcanzable.
+
+La unica solucion para ese regimen es NO OPERAR.
+Detectar "caida sostenida" y pausar el sistema hasta que el regimen cambie.
+
+Esto conecta con Hipotesis 2: el detector de regimen no debe solo
+FILTRAR señales sino PAUSAR el sistema completo en regimenes adversos.
+
+La distincion es importante:
+- Filtrar señales: el sistema sigue mirando, solo opera selectivamente
+- Pausar el sistema: no se genera ninguna señal hasta que el regimen cambie
+
+### Valor academico
+
+5 experimentos que empezaron buscando un filtro de entrada y terminaron
+descubriendo que el problema es la arquitectura de salida y la deteccion
+de regimen. Es un arco de investigacion completo con conclusion no obvia.
+
