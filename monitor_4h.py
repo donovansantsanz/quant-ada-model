@@ -96,6 +96,8 @@ for simbolo in PARAMS_4H:
         print(f"     Telegram enviado")
         # Validar que no hay posicion abierta para este activo
         from validador_posiciones import tiene_posicion_abierta
+        from paper_trading_filtro import evaluar_señal
+        evaluar_señal(simbolo, d['puntos'], d['umbral'], d['rsi'], d['precio'], '4h')
         if tiene_posicion_abierta(simbolo):
             print(f"     ⚠️ {simbolo} ya tiene posicion abierta — SKIP")
             enviar_telegram(f"⚠️ {simbolo} ya tiene posicion abierta — no se ejecuta nueva orden")

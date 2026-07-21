@@ -170,6 +170,8 @@ for simbolo in PARAMS:
     print(f"     {d['decision']} | Score: {d['puntos']} | RSI: {d['rsi']:.1f}")
     if d["decision"] == "COMPRAR":
         from validador_posiciones import tiene_posicion_abierta
+        from paper_trading_filtro import evaluar_señal
+        evaluar_señal(simbolo, d['puntos'], d['umbral'], d['rsi'], d['precio'], 'diario')
         if tiene_posicion_abierta(simbolo):
             print(f"     ⚠️ {simbolo} ya tiene posicion abierta — SKIP")
             enviar_telegram(f"⚠️ {simbolo} ya tiene posicion abierta — no se ejecuta nueva orden")
