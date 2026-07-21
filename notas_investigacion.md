@@ -934,3 +934,54 @@ BNB necesita tratamiento especial: su stop de 2% lo hace incompatible
 con el filtro de volatilidad. La solucion para BNB puede ser diferente
 (ampliar stop, bajar umbral, o pausar en regimenes adversos).
 
+
+---
+
+## 21 julio 2026 — Punto de control (pre-viaje)
+
+### Estado del sistema
+
+- Operaciones cerradas: 9/30 (validacion en curso)
+- Operacion abierta: BNB/EUR €493.33, stop trailing €495.43 (+0.4%)
+- Capital: €193 aprox
+- Bugs resueltos: validador posiciones, evaluador fantasma, trailing alert
+- Paper trading paralelo activo: registra señales con/sin filtro vol5d
+
+### Estado de la investigacion (Hipotesis)
+
+**H1 — Calibracion umbrales BNB/SOL**
+Documentada. BNB 0/3 suelos, umbral demasiado alto.
+Pendiente: walk-forward formal post-validacion.
+
+**H2 — Momentum + detector de regimen**
+Documentada. Idea: pausar sistema en regimen adverso (no solo filtrar).
+Pendiente: implementacion post-validacion.
+
+**H3 — Deteccion caida sostenida (CERRADA)**
+6 experimentos completados:
+- Markov retrospectivo detecta turbulencia (solo en retrospectiva)
+- Markov rolling llega tarde
+- vol5d > p70 mejora en 3/4 activos en muestra
+- Walk-forward: no mejora OOS en BNB (stop 2% incompatible)
+- Stop adaptativo no resuelve el problema (take inalcanzable)
+- ETH/SOL responden mejor al filtro (stop 3% mas amplio)
+Conclusion: problema es arquitectura de salida + pausar sistema en regimen adverso
+
+**H4 — Filtro BTC (valor real?)**
+Documentada. Perjudica BNB en 4/4 periodos.
+Pendiente: walk-forward formal post-validacion.
+
+### Proximos pasos (vuelta del viaje)
+
+1. Crear cuenta nueva X (@donovan_quant) con estrategia clara
+2. Acumular operaciones reales (objetivo: 30 cerradas)
+3. Walk-forward formal H1 y H4 cuando haya suficientes datos
+4. Implementar H2 (pausar sistema) post-validacion
+5. Septiembre: retomar contacto con profesores ULL
+
+### Literatura pendiente de leer
+
+- Wood, Roberts & Zohren (arXiv 2105.13727) — Slow Momentum + CPD
+- Hamilton (1989) — Econometrica 57
+- Filardo (1994) — TVTP
+
