@@ -1,5 +1,9 @@
 # Quantitative Crypto Trading System
 
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![Exchange](https://img.shields.io/badge/Exchange-Bitvavo-green) ![Status](https://img.shields.io/badge/Status-Live-brightgreen) ![Server](https://img.shields.io/badge/Server-Hetzner_VPS-red) ![License](https://img.shields.io/badge/License-MIT-yellow)
+
+
+
 A fully autonomous quantitative trading system for cryptocurrency markets,
 built in Python from scratch by an 18-year-old mathematics student.
 Analyzes 5 assets on a daily timeframe and BNB on a 4H timeframe,
@@ -132,6 +136,16 @@ Before scaling capital, all 4 criteria must be met (Bitvavo validation window):
 - [ ] Consistency with backtest ± 15%
 - [ ] Positive accumulated return
 
+
+## Live Results (Bitvavo, Jul 2026)
+| Metric | Value |
+|--------|-------|
+| Closed operations | 10/30 |
+| Win rate | 30% |
+| Validation window | Active |
+| Status | Accumulating sample (target: 30 ops) |
+
+*All operations logged in `operaciones_reales.csv` with entry/exit prices, returns and venue.*
 ## Author
 
 18-year-old mathematics student at Universidad de La Laguna (Tenerife, Spain).
