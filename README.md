@@ -140,8 +140,8 @@ Before scaling capital, all 4 criteria must be met (Bitvavo validation window):
 ## Live Results (Bitvavo, Jul 2026)
 | Metric | Value |
 |--------|-------|
-| Closed operations | 10/30 |
-| Win rate | 30% |
+| Closed operations | 11/30 |
+| Win rate | 100% (Bitvavo) | 36.4% global |
 | Validation window | Active |
 | Status | Accumulating sample (target: 30 ops) |
 
