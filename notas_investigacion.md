@@ -985,3 +985,312 @@ Pendiente: walk-forward formal post-validacion.
 - Hamilton (1989) — Econometrica 57
 - Filardo (1994) — TVTP
 
+
+---
+## 7 agosto 2026 — Experimento 6: Markov Rolling con Volatilidad Realizada
+
+### Hipótesis
+Usar vol5d como variable de estado del Markov-switching haría el modelo
+más reactivo que usar retornos (Experimento 2), ya que la volatilidad
+explota antes de que el precio colapse.
+
+### Resultado
+El modelo converge correctamente con todos los datos (retrospectivo).
+Régimen 0 (CALMA): vol5d media 0.015, persistencia 96%.
+Régimen 1 (TURBULENTO): vol5d media 0.040, persistencia 90%.
+
+En modo rolling (ventanas 90d y 150d): 245/245 NaN. El optimizador
+no converge en ningún día. El problema es numérico, no conceptual.
+
+### Conclusión
+El Markov-switching sobre vol5d no es viable como filtro en tiempo real
+con la implementación de statsmodels en modo rolling.
+
+El filtro vol5d > p70 (Experimento 3) sigue siendo el candidato más
+robusto: más simple, sin optimización iterativa, y funciona en tiempo real.
+
+### Siguiente experimento sugerido
+Probar Hidden Markov Model (hmmlearn) como alternativa a statsmodels —
+diferente algoritmo de optimización (Baum-Welch vs MLE), puede ser
+más estable en ventanas cortas.
+
+---
+## 7 agosto 2026 — Experimento 7: HMM (hmmlearn) con Vol5d Rolling
+
+### Resultado
+Convergencia: 0/275 NaN — resuelve el problema de statsmodels.
+Algoritmo Baum-Welch más estable que MLE en ventanas cortas.
+
+### Detección caso clave (crash ene-feb 2026)
+Turbulencia detectada: 2026-02-06 (precio €557, -26% desde €753)
+Statsmodels retornos: 2026-02-01 (-12%)
+HMM vol5d: 2026-02-06 (-26%) — PEOR
+
+### Por qué llega tarde
+Vol5d necesita varios días consecutivos de volatilidad extrema
+para cruzar el umbral del régimen turbulento. La señal llega
+cuando el crash ya está muy avanzado.
+
+### Lo que sí funciona
+Detecta correctamente el crash mayo-junio 2026.
+No clasifica el período actual como turbulento (correcto).
+
+### Conclusión del ciclo completo (Exp 2, 6, 7)
+Ninguna variante de Markov/HMM rolling es útil como filtro
+en tiempo real para este problema:
+- Retornos rolling (Exp 2): llega tarde (-12% ya perdido)
+- Vol5d statsmodels (Exp 6): no converge
+- Vol5d HMM (Exp 7): converge pero llega más tarde (-26%)
+
+El filtro vol5d > p70 simple (Exp 3) sigue siendo superior:
+más simple, más reactivo, sin optimización iterativa.
+
+### Valor académico
+Ciclo completo de 3 experimentos con resultado negativo consistente.
+Descarta formalmente los modelos Markov/HMM como filtros en tiempo real
+para este tipo de señales. Citable en TFG.
+
+---
+## 8 agosto 2026 — Experimento 8: Filtro Doble vol5d + RSI Percentil
+
+### Hipótesis
+Combinar vol5d<p70 con RSI_percentil<p30 como filtro doble.
+Las dos variables son independientes (correlación -0.10), por lo que
+capturan información diferente y pueden complementarse.
+
+### Configuración
+- Símbolo: BNB/EUR, 4h
+- Ventana rolling: 90 días (540 barras)
+- Forward return: 24h (6 barras)
+- Filtro A: vol5d_pct < 70
+- Filtro B: rsi_percentil < 30
+
+### Resultados
+
+| Escenario | n | Win rate | Retorno medio 24h |
+|---|---|---|---|
+| Sin filtro | 454 | 50.2% | -0.102% |
+| Solo vol5d<p70 | 323 | 55.1% | +0.137% |
+| Doble filtro | 86 | 68.6% | +0.839% |
+
+### Conclusión preliminar
+El filtro doble mejora sustancialmente el edge:
+- Win rate: 50.2% → 68.6% (+18.4pp)
+- Retorno medio: -0.10% → +0.84%
+- Progresión monotónica y limpia
+
+### Caveat
+Testado en muestra completa — riesgo de overfitting.
+Requiere walk-forward validation antes de considerar implementación.
+
+### Siguiente paso
+Experimento 9: Walk-forward validation del filtro doble.
+Dividir datos en ventanas de entrenamiento y test fuera de muestra.
+
+---
+## 8 agosto 2026 — Experimento 9: Walk-Forward Validation del Filtro Doble
+
+### Configuración
+- Train: 90 días, Test: 30 días, ventanas deslizantes
+- Total barras fuera de muestra: 348
+
+### Resultados
+
+| Escenario | n | Win rate | Retorno medio 24h |
+|---|---|---|---|
+| Sin filtro | 348 | 49.4% | -0.150% |
+| Solo vol5d<p70 | 230 | 55.2% | +0.165% |
+| Doble filtro | 78 | 66.7% | +0.759% |
+
+### Comparación in-sample vs out-of-sample (filtro doble)
+- Win rate: 68.6% → 66.7% (-1.9pp)
+- Retorno: +0.839% → +0.759% (-0.08pp)
+- Degradación mínima — el edge no es overfitting
+
+### Conclusión
+El filtro doble (vol5d<p70 + RSI_percentil<p30) supera el walk-forward.
+Es el primer resultado positivo robusto de toda la serie de investigación.
+Abre la puerta a implementación en el sistema real como capa adicional.
+
+### Siguiente paso
+Evaluar integración del filtro doble en el sistema real (monitor_4h.py).
+No implementar hasta completar las 30 operaciones de validación.
+
+---
+## 10 agosto 2026 — Experimento 10: Robustez del Filtro Doble en Múltiples Pares
+
+### Hipótesis
+¿El edge del filtro doble (vol5d<p70 + RSI_pct<p30) encontrado en BNB/EUR 4h
+se generaliza a otros pares y al timeframe diario?
+
+### Configuración
+- Pares: BNB/EUR, ETH/EUR, SOL/EUR, ADA/EUR, BTC/EUR
+- Timeframe: 1d
+- Forward return: 6 días
+- Walk-forward: train 90d, test 30d
+
+### Resultados
+
+| Par | Sin filtro WR | Doble WR | Doble Ret |
+|-----|--------------|----------|-----------|
+| BNB/EUR | 54.2% | 37.7% | -2.607% |
+| ETH/EUR | 52.2% | 55.0% | -1.576% |
+| SOL/EUR | 49.4% | 46.2% | -1.898% |
+| ADA/EUR | 44.6% | 52.1% | -0.994% |
+| BTC/EUR | 50.3% | 57.1% | -0.930% |
+
+### Conclusión
+El filtro doble NO generaliza al timeframe diario ni a otros pares.
+En todos los casos el retorno medio es negativo con filtro doble.
+El edge encontrado en Exp 8-9 es específico de BNB/EUR en 4h.
+
+### Implicación
+Baja la confianza en el filtro doble como mejora general del sistema.
+Antes de implementar, testear específicamente en 4h para ETH/EUR y SOL/EUR.
+
+### Siguiente paso
+Experimento 11: Filtro doble en ETH/EUR y SOL/EUR en timeframe 4h.
+
+---
+## 10 agosto 2026 — Experimento 11: Filtro Doble en ETH/EUR y SOL/EUR en 4h
+
+### Resultados
+
+| Par | Sin filtro WR | Doble WR | Doble Ret | n |
+|-----|--------------|----------|-----------|---|
+| BNB/EUR | 49.1% | 64.6% | +0.722% | 79 |
+| ETH/EUR | 52.3% | 59.4% | +0.166% | 64 |
+| SOL/EUR | 48.6% | 57.1% | +0.027% | 91 |
+
+### Conclusión
+El edge es del timeframe 4h, no de BNB específicamente.
+Los tres pares mejoran con el filtro doble en 4h.
+El Exp 10 fallaba por el timeframe diario, no por el activo.
+
+### Ranking de pares
+1. BNB/EUR — edge más fuerte (64.6% WR, +0.722%)
+2. ETH/EUR — edge real (59.4% WR, +0.166%)
+3. SOL/EUR — mejora WR pero retorno marginal (+0.027%)
+
+### Implicación
+Abre la puerta a expandir el sistema 4h a ETH/EUR tras validar las 30 ops en BNB.
+SOL requiere más investigación antes de considerarlo.
+
+---
+## 10 agosto 2026 — Experimento 12: Optimización de Umbrales del Filtro Doble
+
+### Grid search (walk-forward, BNB/EUR 4h)
+
+| vol< | rsi< | WR% | Ret% | n |
+|------|------|-----|------|---|
+| p60 | p20 | 62.2% | +0.807% | 45 |
+| p60 | p30 | 63.8% | +0.771% | 69 |
+| p70 | p30 | 64.6% | +0.722% | 79 |
+| p70 | p40 | 63.0% | +0.497% | 108 |
+| p80 | p40 | 59.2% | +0.349% | 120 |
+
+Sin filtro: 49.1% WR | -0.168% (n=348)
+
+### Conclusión
+Todas las combinaciones superan ampliamente al sin filtro.
+Los umbrales originales p70/p30 son óptimos:
+- WR más alto (64.6%)
+- n suficiente (79) para ser estadísticamente fiable
+- p60/p20 tiene mejor retorno pero n=45 insuficiente
+
+### Ciclo de investigación del filtro doble — CERRADO
+- Exp 8: filtro doble funciona en BNB/EUR 4h (in-sample)
+- Exp 9: supera walk-forward validation
+- Exp 10: no generaliza a timeframe diario
+- Exp 11: generaliza a ETH/EUR en 4h
+- Exp 12: umbrales p70/p30 son los óptimos
+
+### Próximo paso
+Implementar filtro doble en sistema real tras completar 30 operaciones en BNB.
+
+---
+## 13 agosto 2026 — Experimento 13: Momentum como Segunda Estrategia
+
+### Hipótesis
+¿Hay edge en comprar cuando el momentum es fuerte en BNB/EUR 4h?
+¿Puede complementar la estrategia mean reversion actual?
+
+### Configuración
+- mom5: retorno 5 barras, mom10: retorno 10 barras
+- Walk-forward: train 90d, test 30d
+- Forward return: 24h (6 barras)
+
+### Resultados
+
+| Estrategia | WR% | Ret% | n |
+|---|---|---|---|
+| Sin filtro | 51.7% | -0.089% | 348 |
+| Mean reversion puro | 40.2% | -0.966% | 82 |
+| Momentum >p70 | 50.8% | +0.247% | 59 |
+| Momentum >p80 | 44.4% | +0.401% | 36 |
+
+### Conclusión
+Momentum simple no tiene edge comparable al filtro doble (64.6% WR).
+Mean reversion puro sin filtros es peor que random — confirma que el
+edge viene del filtro doble (vol5d + RSI percentil), no del concepto solo.
+Momentum como segunda estrategia descartado en esta forma.
+
+### Siguiente paso
+Explorar momentum con filtros adicionales o en timeframe diferente.
+
+---
+## 13 agosto 2026 — Análisis de Métricas del Sistema
+
+### Sharpe Ratio
+- Bitvavo (3 ops): 0.77 — insuficiente muestra estadística
+- Binance (8 ops): -0.84 — período de migración con errores
+- Conclusión: necesita 30 ops en Bitvavo para ser significativo
+
+### Correlación entre pares (1d, último año)
+- BNB es el menos correlacionado con el resto (0.70-0.77)
+- ETH/SOL/ADA muy correlacionados entre sí (0.82-0.88)
+- Segundo par recomendado para expansión: BTC/EUR (0.74 con BNB)
+- Operar ETH+SOL+ADA simultáneamente no diversifica
+
+### Optimización Take Profit
+- Take 15% tendría mayor retorno teórico (+2.24% vs +1.80% actual)
+- Pero irrelevante: las 3 ops de Bitvavo cerraron por trailing stop, nunca por take profit
+- El trailing stop automático es más prioritario que ajustar el take
+
+## Experimento 14: Validación filtro doble en operaciones reales Bitvavo (Aug 14, 2026)
+
+**Objetivo:** Comprobar si las 3 operaciones reales en Bitvavo habrían pasado el filtro doble (vol5d<p70 + RSI_percentil<p30).
+
+**Resultados:**
+| Fecha | vol5d_pct | rsi_pct | Pasa filtro | Retorno real |
+|-------|-----------|---------|-------------|--------------|
+| 2026-07-08 | 0.47 | 0.03 | ✅ Sí | +0.14% |
+| 2026-07-17 | 0.25 | 0.09 | ✅ Sí | +0.43% |
+| 2026-08-02 | 0.70 | 0.14 | ❌ No | +2.78% |
+
+**Conclusiones:**
+- 2/3 ops pasaron el filtro, ambas ganadoras
+- La op más rentable (+2.78%) falló el filtro por vol5d_pct=0.70 exacto (umbral estricto <0.70)
+- Sugiere revisar umbral a <=0.70 en lugar de <0.70
+- n=3 insuficiente para validar estadísticamente — pendiente con 30 ops completas
+
+**Pendiente:** repetir análisis al completar 30 operaciones en Bitvavo
+
+## Experimento 14: Validación filtro doble en operaciones reales Bitvavo (Aug 14, 2026)
+
+**Objetivo:** Comprobar si las 3 operaciones reales en Bitvavo habrían pasado el filtro doble (vol5d<p70 + RSI_percentil<p30).
+
+**Resultados:**
+| Fecha | vol5d_pct | rsi_pct | Pasa filtro | Retorno real |
+|-------|-----------|---------|-------------|--------------|
+| 2026-07-08 | 0.47 | 0.03 | ✅ Sí | +0.14% |
+| 2026-07-17 | 0.25 | 0.09 | ✅ Sí | +0.43% |
+| 2026-08-02 | 0.70 | 0.14 | ❌ No | +2.78% |
+
+**Conclusiones:**
+- 2/3 ops pasaron el filtro, ambas ganadoras
+- La op más rentable (+2.78%) falló el filtro por vol5d_pct=0.70 exacto (umbral estricto <0.70)
+- Sugiere revisar umbral a <=0.70 en lugar de <0.70
+- n=3 insuficiente para validar estadísticamente — pendiente con 30 ops completas
+
+**Pendiente:** repetir análisis al completar 30 operaciones en Bitvavo
