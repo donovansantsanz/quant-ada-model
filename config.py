@@ -6,10 +6,10 @@ PARAMS = {
     'BNB/EUR':  {'umbral': 7, 'stop': 0.02, 'take': 0.10, 'kelly': 28.4, 'filtro_btc': True},
 
     'BTC/EUR':  {'umbral': 5, 'stop': 0.02, 'take': 0.08, 'kelly': 15.1, 'filtro_btc': False},
+    'XRP/EUR':  {'umbral': 5, 'stop': 0.03, 'take': 0.08, 'kelly': 20.0, 'filtro_btc': False},
 }
 
 # Activos en observación
 PARAMS_OBS = {
     'AVAX/EUR': {'umbral': 7, 'stop': 0.02, 'take': 0.10, 'filtro_btc': False},
-    'XRP/EUR': {'umbral': 6, 'stop': 0.03, 'take': 0.08, 'filtro_btc': False},
 }
