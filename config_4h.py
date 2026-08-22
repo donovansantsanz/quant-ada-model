@@ -3,7 +3,9 @@
 # BNB: único activo con test positivo consistente
 
 PARAMS_4H = {
-    'BNB/EUR': {'umbral': 5, 'stop': 0.02, 'take': 0.10, 'kelly': 44.6, 'horizonte_velas': 6},
+    'BNB/EUR':  {'umbral': 5, 'stop': 0.02, 'take': 0.10, 'kelly': 44.6, 'horizonte_velas': 6},
+    'AVAX/EUR': {'umbral': 5, 'stop': 0.02, 'take': 0.10, 'kelly': 20.0, 'horizonte_velas': 6},
+    'XRP/EUR':  {'umbral': 5, 'stop': 0.03, 'take': 0.08, 'kelly': 20.0, 'horizonte_velas': 6},
 }
 
 # En observación — Sharpe test negativo en walk-forward 4h:
