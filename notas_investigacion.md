@@ -1375,3 +1375,10 @@ Resultados:
 Conclusión: los 83 días recientes son un régimen favorable para el sistema.
 BNB y AVAX tienen edge real a 167 días. XRP pierde edge: avg≈0 → mover a OBS.
 Acción: mover XRP/EUR de PARAMS_4H a PARAMS_4H_OBS.
+
+## Exp 25: Análisis de Sensibilidad de Parámetros (2026-08-23)
+Variaciones sobre 167 días (1000 velas 4h).
+BNB/EUR — umbral 4/5/6: Sharpe 11.45/13.00/26.35 | stop 0.01/0.02/0.03: Sharpe 15.69/13.00/11.15
+AVAX/EUR — umbral 4/5/6: Sharpe 10.17/12.05/28.01 | stop 0.01/0.02/0.03: Sharpe 13.52/12.05/12.05
+Conclusión: edge robusto en todas las variaciones. Sharpe >10 en todos los casos.
+No hay señal de overfitting — el edge no depende de parámetros exactos.
