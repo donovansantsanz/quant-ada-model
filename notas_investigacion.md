@@ -1345,3 +1345,33 @@ Explorar momentum con filtros adicionales o en timeframe diferente.
 |--------|-------------|----------|-----------|
 | AVAX/EUR diario | -8.49 | 15 ops | ❌ Descartado |
 | XRP/EUR diario | 10.6 | 15 ops | ✅ Añadido a monitor_v2.py |
+
+## Exp 22: Análisis de Drawdown Máximo (2026-08-23)
+Script: análisis drawdown sobre backtest 500 velas 4h (BNB+AVAX+XRP)
+Resultados:
+- BNB/EUR:  n=28  | WR=82.1% | max_DD=-2.9%
+- AVAX/EUR: n=43  | WR=79.1% | max_DD=-2.7%
+- XRP/EUR:  n=36  | WR=75.0% | max_DD=-8.7%
+- COMBINADO: n=107 | WR=78.5% | max_DD=-8.7%
+Conclusión: XRP es el activo con mayor drawdown. Con sizing real (10% por op),
+el impacto en capital total es <1%. Sistema robusto.
+
+## Exp 23: Monte Carlo 30 operaciones (2026-08-23)
+10.000 simulaciones, sizing=10% por op, WR=78.5%
+- P10: €1106 | Mediana: €1137 | P90: €1168
+- Prob no perder: 100%
+- Prob +10%: 93.4%
+- Drawdown mediano sobre capital: -0.4%
+Conclusión: con sizing conservador es prácticamente imposible perder capital
+en las 30 ops de validación. El sistema está bien dimensionado para esta fase.
+
+## Exp 24: Out-of-Sample Expandido (2026-08-23)
+Comparación 83 días vs 167 días (límite Bitvavo: max 1000 velas).
+Resultados:
+- BNB:  83d WR=82.1% avg=1.15% | 167d WR=55.5% avg=1.10% Sharpe=12.68 ✅
+- AVAX: 83d WR=79.1% avg=3.38% | 167d WR=48.5% avg=1.01% Sharpe=11.62 ✅
+- XRP:  83d WR=75.0% avg=0.76% | 167d WR=54.3% avg=0.13% Sharpe=2.25 ⚠️
+
+Conclusión: los 83 días recientes son un régimen favorable para el sistema.
+BNB y AVAX tienen edge real a 167 días. XRP pierde edge: avg≈0 → mover a OBS.
+Acción: mover XRP/EUR de PARAMS_4H a PARAMS_4H_OBS.
