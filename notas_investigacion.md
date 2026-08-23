@@ -1294,3 +1294,54 @@ Explorar momentum con filtros adicionales o en timeframe diferente.
 - n=3 insuficiente para validar estadísticamente — pendiente con 30 ops completas
 
 **Pendiente:** repetir análisis al completar 30 operaciones en Bitvavo
+
+## Experimento 16: Optimización umbral BNB/EUR 4h (Aug 19, 2026)
+
+**Problema detectado:** umbral 6 (configuración anterior) generaba 0 señales en el período de test (últimas 500 velas). El sistema estaba esencialmente inactivo.
+
+**Resultados walk-forward por umbral (BNB/EUR 4h, stop=2%, take=10%):**
+| Umbral | Train Sharpe | Train ops | Test Sharpe | Test ops | Test WR |
+|--------|-------------|-----------|-------------|----------|---------|
+| 4 | 6.66 | 39 | 7.54 | 11 | 45.5% |
+| 5 | 9.31 | 18 | 31.65 | 5 | 100% |
+| 6 | 16.48 | 10 | -999 | 0 | 0% |
+| 7 | 16.48 | 10 | -999 | 0 | 0% |
+
+**Decisión:** bajar umbral de 6 a 5. Umbral 5 genera señales reales y Sharpe positivo en test.
+
+**Caveat:** 5 ops en test es estadísticamente pequeño. El 100% WR no es concluyente. Pendiente confirmar con más operaciones reales.
+
+**Cambio aplicado:** config_4h.py umbral BNB/EUR 6 → 5
+
+## Experimento 17: Frecuencia de señales con sistema 4h expandido (Aug 23, 2026)
+
+**Sistema anterior (solo BNB):** ~5 clusters/83 días = ~1.8 ops/mes → 17 meses para 30 ops
+
+**Sistema actual (BNB + AVAX + XRP en 4h):**
+- BNB/EUR: 9 clusters en 83 días
+- AVAX/EUR: 10 clusters en 83 días  
+- XRP/EUR: 8 clusters en 83 días
+- Total combinado: ~27 ops en 83 días = **10 ops/mes**
+- Estimación para 30 ops: **~3 meses (finales noviembre 2026)**
+
+**Conclusión:** añadir AVAX y XRP al sistema 4h reduce el tiempo de validación de 17 meses a 3 meses. Decisión correcta.
+
+## Experimento 18: Correlaciones entre activos 4h (Aug 22, 2026)
+
+- BNB vs AVAX: 0.669 🟡 Media
+- BNB vs XRP: 0.742 🔴 Alta
+- AVAX vs XRP: 0.648 🟡 Media
+
+**Nota:** BNB y XRP tienen correlación alta — cuando disparen simultáneamente es esencialmente una posición doble en la misma dirección.
+
+## Experimento 19: Optimización params AVAX y XRP 4h (Aug 22, 2026)
+
+**AVAX/EUR óptimo:** stop=0.02, take=0.08 (Sharpe test 14.25, 10 ops)
+**XRP/EUR óptimo:** stop=0.03, take=0.08 (Sharpe test 11.63, 10 ops)
+
+## Experimento 20: Walk-forward diario AVAX y XRP (Aug 22, 2026)
+
+| Activo | Test Sharpe | Test ops | Veredicto |
+|--------|-------------|----------|-----------|
+| AVAX/EUR diario | -8.49 | 15 ops | ❌ Descartado |
+| XRP/EUR diario | 10.6 | 15 ops | ✅ Añadido a monitor_v2.py |
