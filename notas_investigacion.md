@@ -1387,3 +1387,10 @@ No hay señal de overfitting — el edge no depende de parámetros exactos.
 Op: BNB/EUR Aug 2→5. Precio señal (cierre vela 20:00): 499.12€
 Precio ejecución real: 498.98€ | Slippage: -0.028% (favorable)
 Conclusión: slippage despreciable en Bitvavo. El sistema ejecuta al precio correcto.
+
+## Exp 27: Bootstrap Confidence Intervals Sharpe (2026-08-26)
+10.000 iteraciones bootstrap sobre 167 días (1000 velas 4h).
+BNB/EUR  (n=99):  Sharpe=16.59 | IC95%=[10.35, 22.74] | Prob>0=100%
+AVAX/EUR (n=119): Sharpe=14.72 | IC95%=[8.38, 20.99]  | Prob>0=100%
+Conclusión: edge estadísticamente robusto. Límite inferior IC95% >8 en ambos activos.
+El Sharpe positivo no es ruido — es una señal real con alta confianza estadística.
