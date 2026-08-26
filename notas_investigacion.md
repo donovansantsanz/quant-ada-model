@@ -1382,3 +1382,8 @@ BNB/EUR — umbral 4/5/6: Sharpe 11.45/13.00/26.35 | stop 0.01/0.02/0.03: Sharpe
 AVAX/EUR — umbral 4/5/6: Sharpe 10.17/12.05/28.01 | stop 0.01/0.02/0.03: Sharpe 13.52/12.05/12.05
 Conclusión: edge robusto en todas las variaciones. Sharpe >10 en todos los casos.
 No hay señal de overfitting — el edge no depende de parámetros exactos.
+
+## Exp 26: Análisis de Slippage Real (2026-08-26)
+Op: BNB/EUR Aug 2→5. Precio señal (cierre vela 20:00): 499.12€
+Precio ejecución real: 498.98€ | Slippage: -0.028% (favorable)
+Conclusión: slippage despreciable en Bitvavo. El sistema ejecuta al precio correcto.
