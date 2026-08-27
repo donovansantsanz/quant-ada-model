@@ -1402,3 +1402,12 @@ AVAX: avg bruto=1.05% → neto=0.55% | Sharpe 12.05→6.31 | fees=47.6% del reto
 Ops reales (2.47-2.78% bruto): impacto fees ~20% — manejable.
 Sharpe neto >6 en ambos activos — edge persiste después de fees.
 Acción futura: con mayor capital, fees bajan a 0.15% (€10K/mes volumen).
+
+## Exp 29: Sensibilidad Parámetros Sistema Diario (2026-08-27)
+500 velas diarias, variación umbral ±1.
+ETH/EUR:  Sharpe 3.49-4.18 — edge robusto ✅
+SOL/EUR:  Sharpe 2.82-5.43 — edge robusto ✅  
+BTC/EUR:  Sharpe 1.33-3.23 — edge moderado ✅
+BNB/EUR:  Sharpe 2.51 pero n=17 — estadísticamente débil ⚠️
+ADA/EUR:  Sharpe 0.03-0.41 — sin edge real ❌ → mover a OBS
+Acción: ADA/EUR → PARAMS_OBS en config.py
