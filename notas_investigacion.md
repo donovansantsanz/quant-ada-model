@@ -1394,3 +1394,11 @@ BNB/EUR  (n=99):  Sharpe=16.59 | IC95%=[10.35, 22.74] | Prob>0=100%
 AVAX/EUR (n=119): Sharpe=14.72 | IC95%=[8.38, 20.99]  | Prob>0=100%
 Conclusión: edge estadísticamente robusto. Límite inferior IC95% >8 en ambos activos.
 El Sharpe positivo no es ruido — es una señal real con alta confianza estadística.
+
+## Exp 28: Impacto de Fees en Retorno Real (2026-08-27)
+Fee Bitvavo: 0.25% por lado = 0.50% por operación completa.
+BNB:  avg bruto=1.12% → neto=0.62% | Sharpe 13.00→7.20 | fees=44.6% del retorno
+AVAX: avg bruto=1.05% → neto=0.55% | Sharpe 12.05→6.31 | fees=47.6% del retorno
+Ops reales (2.47-2.78% bruto): impacto fees ~20% — manejable.
+Sharpe neto >6 en ambos activos — edge persiste después de fees.
+Acción futura: con mayor capital, fees bajan a 0.15% (€10K/mes volumen).
