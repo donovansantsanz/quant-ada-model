@@ -39,23 +39,8 @@ def posicion_abierta(exchange, simbolo):
         return False
 
 def colocar_ordenes_proteccion(exchange, simbolo, cantidad_real, stop_precio, take_precio):
-    """
-    Coloca stop-limit y limit por separado (Bitvavo, vía ccxt).
-    Devuelve (orden_stop_id, orden_take_id) o lanza excepción.
-    """
-    stop_limit = round(stop_precio * 0.998, 4)
-
-    # 1. Stop-limit (stop loss) — Bitvavo: stopLossLimit + triggerPrice
-    orden_stop = exchange.create_order(
-        simbolo,
-        'stopLossLimit',
-        'sell',
-        cantidad_real,
-        stop_limit,
-        {'triggerPrice': stop_precio},
-    )
-
-    # 2. Take-profit con trigger (no bloquea saldo hasta dispararse)
+    import time
+    # 1. Take-profit primero (no bloquea saldo)
     take_limit = round(take_precio * 0.998, 4)
     orden_take = exchange.create_order(
         simbolo,
@@ -65,7 +50,17 @@ def colocar_ordenes_proteccion(exchange, simbolo, cantidad_real, stop_precio, ta
         take_limit,
         {'triggerPrice': take_precio},
     )
-
+    time.sleep(3)
+    # 2. Stop-limit después
+    stop_limit = round(stop_precio * 0.99, 4)
+    orden_stop = exchange.create_order(
+        simbolo,
+        'stopLossLimit',
+        'sell',
+        cantidad_real,
+        stop_limit,
+        {'triggerPrice': stop_precio},
+    )
     return orden_stop['id'], orden_take['id']
 
 def ejecutar_compra(simbolo, señal):
@@ -142,7 +137,7 @@ Cantidad: <b>{cantidad_real}</b>
 Capital: <b>€{capital:.2f} EUR</b>
 
 Coloca manualmente en Bitvavo:
-- Stop limit — trigger: {stop_precio} | limit: {round(stop_precio * 0.998, 4)}
+- Stop limit — trigger: {stop_precio} | limit: {round(stop_precio * 0.99, 4)}
 - Take profit — limit: {take_precio}
 Cantidad: {cantidad_real}
 

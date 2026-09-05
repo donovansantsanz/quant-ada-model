@@ -6,8 +6,14 @@ fecha_entrada,activo,sistema,precio_entrada,cantidad,capital_usdc,stop_loss,take
 2026-06-26 10:30,ETH/USDT,diario,1551.33,0.02836,43.98,1547.26,1708.43,4.6%,,,,,2026-06-28 23:53,1547.26,-0.26,stop_loss,Ejecucion automatica parcial,binance
 2026-06-26 10:30,BTC/USDT,diario,59725.99,0.0006,35.84,58531.47,64504.07,3.8%,,,,,2026-06-26 14:00,58529.9115,-2.0,stop_loss,Ejecucion manual — saldo insuficiente automatico,binance
 2026-06-28 20:02,BNB/USDT,4h,549.15,0.182,100.0,549.1626,603.262,10.0%,,,,,2026-06-30 10:30,549.16,0.0,stop_loss,,binance
-2026-06-30 10:30,BTC/USDT,diario,59300.01,0.0006,37.75,58177.7098,64114.2108,3.8%,59365.01,-10.9,9719290827,9719290828,2026-06-30 14:00,58176.6,-1.89,stop_loss,Reabierta - cierre erroneo por huerfana de op antigua,binance
+2026-06-30 10:30,BTC/USDT,diario,59300.01,0.0006,37.75,58177.7098,64114.2108,3.8%,59365.01,-10.9,9719290827,9719290828,2026-06-30 14:00,58176.6,-1.89,stop_loss,Reabierta - cierre erroneo por huerfana de op antigua [EXCLUIDA],binance
 2026-07-08 04:00,BNB/EUR,4h,498.54,0.2006,100.0,499.39,548.32,10.0%,498.47,1.4,,,2026-07-17 00:09,499.25,0.14,stop_loss,Trailing stop ejecutado - cierre en verde,bitvavo
-2026-07-08 11:09,BNB/EUR,4h,493.52,0.1883,92.85,483.24,542.41,10.0%,493.1,8.5,,,2026-07-08 11:15,493.43,-0.02,cerrado_manual,Cierre manual - posicion duplicada,bitvavo
-2026-07-08 12:00,BNB/EUR,4h,496.56,0.1871,92.85,486.27,545.81,10.0%,496.19,7.5,,,2026-07-08 12:35,494.99,-0.31,cerrado_manual,Cierre manual - posicion duplicada,bitvavo
+2026-07-08 11:09,BNB/EUR,4h,493.52,0.1883,92.85,483.24,542.41,10.0%,493.1,8.5,,,2026-07-08 11:15,493.43,-0.02,cerrado_manual,Cierre manual - posicion duplicada [EXCLUIDA],bitvavo
+2026-07-08 12:00,BNB/EUR,4h,496.56,0.1871,92.85,486.27,545.81,10.0%,496.19,7.5,,,2026-07-08 12:35,494.99,-0.31,cerrado_manual,Cierre manual - posicion duplicada [EXCLUIDA],bitvavo
 2026-07-17 10:33,BNB/EUR,4h,493.33,0.2026,100.0,495.43,542.66,10.0%,493.47,-2.8,,,2026-07-24 12:57,495.43,0.43,stop_loss,Trailing stop ejecutado en verde,bitvavo
+2026-08-02 00:00,BNB/EUR,4h,498.978851,0.2004,100.0,512.83,549.032,10.0%,499.12,-2.8,,,2026-08-06 00:10,512.83,2.78,stop_loss,Trailing stop ejecutado en verde,bitvavo
+2026-08-26 16:00,AVAX/EUR,4h,6.21,8.0536,50.0,6.0842,6.7051,5.0%,6.2084,2.6,,,2026-08-29 11:56,6.277,1.08,stop_loss,Cerrada a mercado - stop-limit no ejecutó en caída rápida,bitvavo
+2026-08-28 20:00,BNB/EUR,4h,594.52,0.1682,100.0,582.4826,653.807,10.0%,594.37,2.5,,,2026-09-01 19:44,582.40,-2.04,stop_loss,Stop ejecutado - gap 1% funcionó,bitvavo
+2026-08-31 00:00,AVAX/EUR,4h,6.1275,8.1344,50.0,6.0238,6.6384,5.0%,6.1467,-31.2,,,2026-09-01 19:39,6.1800,0.86,stop_loss,Stop breakeven ejecutado,bitvavo
+2026-09-01 20:00,BNB/EUR,4h,586.79,0.1706,100.0,608.4000,644.952,10.0%,586.32,8.0,,,2026-09-05 09:23,644.95,9.93,take_profit,Take profit ejecutado,bitvavo
+2026-09-02 01:00,AVAX/EUR,4h,6.2265,8.0218,49.97,6.3300,6.7300,5.0%,6.2330,0.0,,,2026-09-04 13:34,6.3300,1.03,stop_loss,Stop ejecutado en verde,bitvavo

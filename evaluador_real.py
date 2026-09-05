@@ -52,7 +52,7 @@ def cancelar_orden(exchange, simbolo, orden_id, etiqueta='orden'):
         print(f"  ℹ️ {etiqueta} #{orden_id} no cancelable: {e}")
 
 def colocar_stop_limit(exchange, simbolo, cantidad, stop_precio):
-    stop_limit = round(stop_precio * 0.998, 4)
+    stop_limit = round(stop_precio * 0.99, 4)
     orden = exchange.create_order(
         simbolo, 'stopLossLimit', 'sell', cantidad, stop_limit,
         {'triggerPrice': stop_precio},
@@ -96,7 +96,8 @@ def evaluar_operaciones():
 
     for idx, fila in df.iterrows():
         resultado_val = str(fila['resultado']).strip() if pd.notna(fila['resultado']) else ''
-        if resultado_val not in ('', 'nan'):
+        fecha_cierre_val = str(fila.get('fecha_cierre', '')).strip() if pd.notna(fila.get('fecha_cierre', '')) else ''
+        if resultado_val not in ('', 'nan') or fecha_cierre_val not in ('', 'nan'):
             continue
 
         simbolo        = str(fila['activo']).replace('/USDT', '/EUR').replace('/USDC', '/EUR')
@@ -161,6 +162,17 @@ Stop nuevo: <b>€{nuevo_stop}</b>
 
             # ── MÉTODO ANTIGUO (operaciones sin IDs, por compatibilidad) ─
             else:
+                # Verificar si hay órdenes abiertas en Bitvavo antes de enviar trailing stop
+                try:
+                    ordenes_abiertas = exchange.fetch_open_orders(simbolo)
+                except Exception as oe:
+                    print(f"⚠️ {simbolo_orig}: error consultando órdenes abiertas: {oe}")
+                    ordenes_abiertas = None  # si falla la consulta, asumimos abierta
+
+                if ordenes_abiertas is not None and len(ordenes_abiertas) == 0:
+                    print(f"⏭️ {simbolo_orig} (sin IDs): sin órdenes abiertas en Bitvavo → OCO ya ejecutado, saltando")
+                    continue
+
                 precio_actual = exchange.fetch_ticker(simbolo)['last']
                 nuevo_stop = round(precio_actual * 0.98, 4)
                 if nuevo_stop > stop * 1.02:

@@ -10,8 +10,8 @@ SIMBOLO = 'BNB/EUR'
 TIMEFRAME = '4h'
 RSI_PERIODO = 14
 FORWARD_BARS = 6
-VENTANA_TRAIN = 90 * 6  # 90 días en barras 4h
-VENTANA_TEST = 30 * 6   # 30 días en barras 4h
+VENTANA_TRAIN = 90 * 6
+VENTANA_TEST = 30 * 6
 
 def calcular_rsi(precios, periodo=14):
     delta = precios.diff()
@@ -24,12 +24,13 @@ print("Descargando datos...")
 ohlcv = exchange.fetch_ohlcv(SIMBOLO, TIMEFRAME, limit=1000)
 df = pd.DataFrame(ohlcv, columns=['ts','open','high','low','close','vol'])
 df['fecha'] = pd.to_datetime(df['ts'], unit='ms')
-df = df.set_index('fecha').reset_index()
+df = df.reset_index(drop=True)
 df['retorno'] = df['close'].pct_change()
 df['vol5d'] = df['retorno'].rolling(5).std()
 df['rsi'] = calcular_rsi(df['close'], RSI_PERIODO)
 
-resultados_wf = []
+# Calcular percentiles rolling walk-forward
+resultados = []
 inicio = VENTANA_TRAIN
 
 while inicio + VENTANA_TEST + FORWARD_BARS <= len(df):
@@ -46,8 +47,7 @@ while inicio + VENTANA_TEST + FORWARD_BARS <= len(df):
         precio_salida = df.loc[idx_global + FORWARD_BARS, 'close']
         retorno = (precio_salida - precio_entrada) / precio_entrada * 100
 
-        resultados_wf.append({
-            'fecha': fila['fecha'],
+        resultados.append({
             'vol5d_pct': vol5d_pct,
             'rsi_pct': rsi_pct,
             'retorno_24h': retorno
@@ -55,19 +55,27 @@ while inicio + VENTANA_TEST + FORWARD_BARS <= len(df):
 
     inicio += VENTANA_TEST
 
-res = pd.DataFrame(resultados_wf)
+res = pd.DataFrame(resultados)
 
-sin_filtro = res['retorno_24h'].dropna()
-solo_vol = res[res['vol5d_pct'] < 70]['retorno_24h'].dropna()
-doble = res[(res['vol5d_pct'] < 70) & (res['rsi_pct'] < 30)]['retorno_24h'].dropna()
+# Grid search de umbrales
+VOL_UMBRALES = [60, 70, 80]
+RSI_UMBRALES = [20, 30, 40]
 
-print(f"\nTotal barras fuera de muestra: {len(res)}")
-print("\n=== WALK-FORWARD — RETORNO MEDIO 24h ===")
-print(f"Sin filtro:      {sin_filtro.mean():.3f}% (n={len(sin_filtro)})")
-print(f"Solo vol5d<p70:  {solo_vol.mean():.3f}% (n={len(solo_vol)})")
-print(f"Doble filtro:    {doble.mean():.3f}% (n={len(doble)})")
+print("\n=== OPTIMIZACIÓN DE UMBRALES (walk-forward) ===\n")
+print(f"{'vol<':<8} {'rsi<':<8} {'WR%':<10} {'Ret%':<10} {'n':<6}")
+print("-" * 42)
 
-print("\n=== WALK-FORWARD — WIN RATE ===")
-print(f"Sin filtro:      {(sin_filtro > 0).mean()*100:.1f}%")
-print(f"Solo vol5d<p70:  {(solo_vol > 0).mean()*100:.1f}%")
-print(f"Doble filtro:    {(doble > 0).mean()*100:.1f}%")
+mejores = []
+for vol_u in VOL_UMBRALES:
+    for rsi_u in RSI_UMBRALES:
+        subset = res[(res['vol5d_pct'] < vol_u) & (res['rsi_pct'] < rsi_u)]['retorno_24h'].dropna()
+        if len(subset) < 20:
+            continue
+        wr = (subset > 0).mean() * 100
+        ret = subset.mean()
+        print(f"p{vol_u:<7} p{rsi_u:<7} {wr:<10.1f} {ret:<10.3f} {len(subset):<6}")
+        mejores.append((vol_u, rsi_u, wr, ret, len(subset)))
+
+print("\n--- Referencia ---")
+ref = res['retorno_24h'].dropna()
+print(f"Sin filtro:    WR {(ref>0).mean()*100:.1f}% | Ret {ref.mean():.3f}% (n={len(ref)})")
