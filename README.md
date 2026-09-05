@@ -100,7 +100,7 @@ with automatic execution, Telegram alerts, and real capital deployed.
 | descargar_datos.py | Downloads 90d OHLCV from Bitvavo for regime analysis |
 | graficos.py | Equity curve + return distribution PNGs |
 | ejecutor.py | Automatic execution — buy + stopLossLimit + takeProfitLimit |
-| evaluador_real.py | Hourly evaluator — ID matching, orphan cancel, trailing stop, P&L |
+| evaluador_real.py | Hourly evaluator — ID matching, orphan cancel, trailing stop, P&L. Checks open orders on Bitvavo before trailing (prevents false alerts after OCO execution) |
 | monitor_salud.py | Weekly health check — rolling 90d Kelly vs full-sample |
 | paper_trading.py | Daily paper trading — signal logging (archived, superseded by live) |
 | paper_trading_4h.py | 4H paper trading — signal logging (archived, superseded by live) |
@@ -116,6 +116,15 @@ with automatic execution, Telegram alerts, and real capital deployed.
 | mis_operaciones.py | Live P&L of open positions |
 | historial.py | Clean view of daily paper trading CSV |
 | watchdog.py | Automated health monitor — Telegram alert on failure |
+| experimento_walkforward_filtro.py | Walk-forward experiment — alternative filter configurations |
+| experimento_filtro_4h_pares.py | 4H filter experiment — pair-level filter testing |
+| experimento_filtro_doble.py | Double filter experiment — composite regime filter |
+| experimento_hmm_vol.py | HMM volatility regime experiment |
+| experimento_markov_vol.py | Markov volatility model experiment |
+| experimento_markov_vol2.py | Markov volatility model v2 — extended state space |
+| experimento_momentum.py | Momentum factor experiment |
+| experimento_optimizacion_umbrales.py | Threshold optimization experiment |
+| experimento_robustez_pares.py | Robustness experiment — cross-pair parameter stability |
 
 ## Infrastructure
 
