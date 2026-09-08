@@ -11,5 +11,5 @@ PARAMS = {
 
 # Activos en observación
 PARAMS_OBS = {
-    'AVAX/EUR': {'umbral': 7, 'stop': 0.02, 'take': 0.10, 'filtro_btc': False},
+
 }
