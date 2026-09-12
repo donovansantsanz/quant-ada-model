@@ -17,6 +17,6 @@ fecha_entrada,activo,sistema,precio_entrada,cantidad,capital_usdc,stop_loss,take
 2026-08-31 00:00,AVAX/EUR,4h,6.1275,8.1344,50.0,6.0238,6.6384,5.0%,6.1467,-31.2,,,2026-09-01 19:39,6.18,0.86,stop_loss,Stop breakeven ejecutado,bitvavo,,,,,
 2026-09-01 20:00,BNB/EUR,4h,586.79,0.1706,100.0,608.4,644.952,10.0%,586.32,8.0,,,2026-09-05 09:23,644.95,9.93,take_profit,Take profit ejecutado,bitvavo,,,,,
 2026-09-02 01:00,AVAX/EUR,4h,6.2265,8.0218,49.97,6.33,6.73,5.0%,6.233,0.0,,,2026-09-04 13:34,6.33,1.03,stop_loss,Stop ejecutado en verde,bitvavo,,,,,
-2026-09-10 00:00,BNB/EUR,4h,621.04,0.1609,100.0,622.2,683.793,10.0%,621.63,-9.5,,,,,,,Trailing stop actualizado manualmente,bitvavo,,,,,
+2026-09-10 00:00,BNB/EUR,4h,621.04,0.1609,100.0,622.2,683.793,10.0%,621.63,-9.5,,,2026-09-11 18:06,622.2,0.19,stop_loss,Stop en verde ejecutado por OCO,bitvavo,,,,,
 2026-09-10 00:00,AVAX/EUR,4h,6.7011,7.4585,50.0,6.5697,7.2401,5.0%,6.7038,-4.0,,,2026-09-11 16:52,6.5643,-2.04,stop_loss,Stop ejecutado por OCO,bitvavo,,,,,
 2026-09-12 00:00,AVAX/EUR,4h,6.4353,7.7759,50.0,6.3015,6.9445,5.0%,6.4301,8.1,,,,,,,Protección manual pendiente,bitvavo,,,,,
