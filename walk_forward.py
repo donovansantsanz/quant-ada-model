@@ -5,26 +5,25 @@ from scipy import stats
 
 def obtener_datos(simbolo, dias=500):
     exchange = ccxt.bitvavo()
-    velas = exchange.fetch_ohlcv(simbolo, timeframe='1d', limit=dias)
-    df = pd.DataFrame(velas, columns=['timestamp','open','high','low','close','volume'])
-    df['fecha'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return df.sort_values('fecha').reset_index(drop=True)
+    velas = exchange.fetch_ohlcv(simbolo, timeframe="4h", limit=1440)
+    df = pd.DataFrame(velas, columns=["timestamp","open","high","low","close","volume"])
+    df["fecha"] = pd.to_datetime(df["timestamp"], unit="ms")
+    return df.sort_values("fecha").reset_index(drop=True)
 
 def calcular_scores(precios):
-    mm7  = precios.rolling(7).mean()
-    mm20 = precios.rolling(20).mean()
+    mm7  = precios.rolling(42).mean()
+    mm20 = precios.rolling(120).mean()
     dist_mm20   = (precios - mm20) / mm20
     dist_mm7    = (precios - mm7)  / mm7
-    vol_30      = precios.pct_change().rolling(30).std()
-    momentum_14 = precios / precios.shift(14) - 1
-
+    vol_30      = precios.pct_change().rolling(180).std()
+    momentum_14 = precios / precios.shift(84) - 1
+    warmup = 300
     scores = []
-    for i in range(50, len(precios)):
+    for i in range(warmup, len(precios)):
         pct_mm20 = stats.percentileofscore(dist_mm20.iloc[:i].dropna(), dist_mm20.iloc[i])
         pct_mm7  = stats.percentileofscore(dist_mm7.iloc[:i].dropna(),  dist_mm7.iloc[i])
         pct_vol  = stats.percentileofscore(vol_30.iloc[:i].dropna(),    vol_30.iloc[i])
         pct_mom  = stats.percentileofscore(momentum_14.iloc[:i].dropna(), momentum_14.iloc[i])
-
         puntos = 0
         if pct_mm20 < 20:   puntos += 3
         elif pct_mm20 < 40: puntos += 1
@@ -46,20 +45,20 @@ def calcular_scores(precios):
 
 def backtesting_periodo(scores, precios, umbral, stop, take, inicio, fin):
     retornos = []
-    for i in range(inicio, min(fin, len(scores)-14)):
+    for i in range(inicio, min(fin, len(scores)-84)):
         if scores[i] >= umbral:
             p_entrada = precios.iloc[i]
             p_stop    = p_entrada * (1 - stop)
             p_take    = p_entrada * (1 + take)
             retorno   = None
-            for j in range(1, 15):
+            for j in range(1, 85):
                 p = precios.iloc[i+j]
                 if p <= p_stop:
                     retorno = -stop; break
                 elif p >= p_take:
                     retorno = take;  break
             if retorno is None:
-                retorno = (precios.iloc[i+14] - p_entrada) / p_entrada
+                retorno = (precios.iloc[i+84] - p_entrada) / p_entrada
             retornos.append(retorno)
     if len(retornos) < 3:
         return -999, 0
@@ -67,37 +66,28 @@ def backtesting_periodo(scores, precios, umbral, stop, take, inicio, fin):
     if r.std() == 0:
         sharpe = 99.0 if r.mean() > 0 else -99.0
     else:
-        sharpe = r.mean() / r.std() * np.sqrt(252)
+        sharpe = r.mean() / r.std() * np.sqrt(252*6)
     return round(sharpe, 2), len(retornos)
 
 from config import PARAMS
-ACTIVOS = {k: {'umbral': v['umbral'], 'stop': v['stop'], 'take': v['take']} for k, v in PARAMS.items()}
+ACTIVOS = {k: {"umbral": v["umbral"], "stop": v["stop"], "take": v["take"]} for k, v in PARAMS.items()}
 
-print("Walk-Forward Validation\n")
-print(f"{'Activo':<12} {'Train (270d)':>14} {'Test (95d)':>12} {'Veredicto':>12}")
-print("─" * 55)
+print("Walk-Forward Validation (4H)\n")
+print("%-12s %14s %13s %12s" % ("Activo", "Train (~370d)", "Test (~130d)", "Veredicto"))
+print("─" * 57)
 
 for simbolo, cfg in ACTIVOS.items():
     df = obtener_datos(simbolo, dias=500)
-    precios = df['close']
+    precios = df["close"]
     scores = calcular_scores(precios)
-    precios_trim = precios.iloc[50:].reset_index(drop=True)
-
+    precios_trim = precios.iloc[300:].reset_index(drop=True)
     n = len(scores)
     corte = int(n * 0.74)
-
-    sharpe_train, ops_train = backtesting_periodo(
-        scores, precios_trim, cfg['umbral'], cfg['stop'], cfg['take'], 0, corte)
-    sharpe_test, ops_test = backtesting_periodo(
-        scores, precios_trim, cfg['umbral'], cfg['stop'], cfg['take'], corte, n)
-
-    if sharpe_test > 1.0:
-        veredicto = "✅ Robusto"
-    elif sharpe_test > 0:
-        veredicto = "⚠️  Débil"
-    else:
-        veredicto = "❌ Sobreajuste"
-
-    print(f"{simbolo:<12} {sharpe_train:>8.2f} ({ops_train:>2} ops)  {sharpe_test:>6.2f} ({ops_test:>2} ops)  {veredicto}")
+    sharpe_train, ops_train = backtesting_periodo(scores, precios_trim, cfg["umbral"], cfg["stop"], cfg["take"], 0, corte)
+    sharpe_test, ops_test = backtesting_periodo(scores, precios_trim, cfg["umbral"], cfg["stop"], cfg["take"], corte, n)
+    if sharpe_test > 1.0:   veredicto = "✅ Robusto"
+    elif sharpe_test > 0:   veredicto = "⚠️  Débil"
+    else:                   veredicto = "❌ Sobreajuste"
+    print(f"{simbolo:<12} {sharpe_train:>8.2f} ({ops_train:>2} ops)  {sharpe_test:>7.2f} ({ops_test:>2} ops)  {veredicto}")
 
 print("\n✅ Walk-forward completado")
