@@ -8,6 +8,27 @@ from scipy import stats
 import requests
 from dotenv import load_dotenv
 from config_4h import PARAMS_4H
+
+def stops_consecutivos(simbolo, csv_path='/root/proyectos-quant/operaciones_reales.csv'):
+    """Cuenta stops consecutivos recientes para un activo."""
+    try:
+        import pandas as pd
+        df = pd.read_csv(csv_path)
+        cerradas = df[(df['activo'] == simbolo) & df['resultado'].notna() & (df['resultado'] != '')]
+        if len(cerradas) == 0:
+            return 0
+        resultados = cerradas['resultado'].tolist()
+        consecutivos = 0
+        for r in reversed(resultados):
+            if r == 'stop_loss' and float(cerradas.iloc[-(consecutivos+1)]['retorno_pct']) < 0:
+                consecutivos += 1
+            else:
+                break
+        return consecutivos
+    except Exception:
+        return 0
+
+
 from datetime import datetime, timezone
 
 load_dotenv()
@@ -98,7 +119,12 @@ for simbolo in PARAMS_4H:
         from validador_posiciones import tiene_posicion_abierta
         from paper_trading_filtro import evaluar_señal
         evaluar_señal(simbolo, d['puntos'], d['umbral'], d['rsi'], d['precio'], '4h')
-        if tiene_posicion_abierta(simbolo):
+        stops = stops_consecutivos(simbolo)
+        if stops >= 2:
+            msg_bloqueo = f"🚫 {simbolo} BLOQUEADO — {stops} stops consecutivos. Señal ignorada."
+            print(f"     {msg_bloqueo}")
+            enviar_telegram(msg_bloqueo)
+        elif tiene_posicion_abierta(simbolo):
             print(f"     ⚠️ {simbolo} ya tiene posicion abierta — SKIP")
             enviar_telegram(f"⚠️ {simbolo} ya tiene posicion abierta — no se ejecuta nueva orden")
         elif MODO_TEST:
