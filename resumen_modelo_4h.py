@@ -13,7 +13,8 @@ print(f"  {'Activo':<12} {'Umbral':<8} {'Stop':<7} {'Take':<7} {'Kelly':<8} {'Ho
 print(f"  {'─'*70}")
 
 WALK_FORWARD = {
-    'BNB/EUR': {'sharpe_train': 2.23, 'sharpe_test': 0.32, 'win_rate': 75.0},
+    'BNB/EUR': {'sharpe_train': 3.99, 'sharpe_test': 2.84, 'win_rate': 75.0},
+    'AVAX/EUR': {'sharpe_train': 3.16, 'sharpe_test': -0.83, 'win_rate': 50.0},
 }
 
 for simbolo, p in PARAMS_4H.items():
