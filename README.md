@@ -6,7 +6,7 @@
 
 A fully autonomous quantitative trading system for cryptocurrency markets,
 built in Python from scratch by an 18-year-old mathematics student.
-Analyzes 5 assets on a daily timeframe and BNB on a 4H timeframe,
+Analyzes 6 assets on a daily timeframe and BNB/AVAX on a 4H timeframe,
 with automatic execution, Telegram alerts, and real capital deployed.
 
 > **July 2026 — Exchange migration.** On July 1st 2026, Binance suspended spot
@@ -50,12 +50,13 @@ with automatic execution, Telegram alerts, and real capital deployed.
 
 ## Walk-Forward Validation Results (4H System)
 
-| Asset    | Sharpe Train | Sharpe Test | Status      |
-|----------|-------------|-------------|-------------|
-| BNB/EUR  | 0.45        | 0.32        | ✅ Live     |
-| ETH/EUR  | —           | Negative    | ❌ Rejected |
-| ADA/EUR  | —           | Negative    | ❌ Rejected |
-| SOL/EUR  | —           | Negative    | ❌ Rejected |
+| Asset    | Sharpe Train | Sharpe Test | Ops Test | Status      |
+|----------|-------------|-------------|----------|-------------|
+| BNB/EUR  | 3.99        | 2.84        | 20       | ✅ Live     |
+| AVAX/EUR | 3.16        | -0.83       | 26       | ⚠️ Live/Watch |
+| ETH/EUR  | —           | Negative    | —        | ❌ Rejected |
+| ADA/EUR  | —           | Negative    | —        | ❌ Rejected |
+| SOL/EUR  | —           | Negative    | —        | ❌ Rejected |
 
 *Validated on Binance/USDT historical data prior to migration. BNB is the only 4H asset with a consistent positive out-of-sample test.*
 
@@ -140,18 +141,20 @@ with automatic execution, Telegram alerts, and real capital deployed.
 ## Capital Expansion Checklist
 
 Before scaling capital, all 4 criteria must be met (Bitvavo validation window):
-- [ ] ≥ 30 closed operations
+- [ ] ≥ 30 closed operations (21/30 ✓ in progress)
 - [ ] Win rate ≥ 30%
 - [ ] Consistency with backtest ± 15%
 - [ ] Positive accumulated return
 
 
-## Live Results (Bitvavo, Jul 2026)
+## Live Results (Bitvavo, Sep 2026)
 | Metric | Value |
 |--------|-------|
-| Closed operations | 11/30 |
-| Win rate | 100% (Bitvavo) | 36.4% global |
-| Validation window | Active |
+| Closed operations | 21 (13 EUR + 8 USDT legacy) |
+| Win rate | 42.9% overall / 61.5% EUR-only |
+| Accumulated return | +1.77% overall / +10.53% EUR-only |
+| Open positions | 2 (AVAX/EUR, BNB/EUR) |
+| Validation window | 21/30 ops |
 | Status | Accumulating sample (target: 30 ops) |
 
 *All operations logged in `operaciones_reales.csv` with entry/exit prices, returns and venue.*
