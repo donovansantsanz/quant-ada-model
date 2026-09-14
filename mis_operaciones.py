@@ -35,8 +35,8 @@ else:
 
         p_entrada = float(r['precio_entrada'])
         cantidad  = float(r['cantidad'])
-        stop      = float(r['stop_loss'])
-        take      = float(r['take_profit'])
+        stop      = float(r['stop'] if pd.notna(r.get('stop')) and r.get('stop') != '' else r['stop_loss'])
+        take      = float(r['take'] if pd.notna(r.get('take')) and r.get('take') != '' else r['take_profit'])
 
         retorno_pct = (precio_actual - p_entrada) / p_entrada * 100
         pnl_usdc    = (precio_actual - p_entrada) * cantidad
