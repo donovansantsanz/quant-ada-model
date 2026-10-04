@@ -2,7 +2,7 @@ import ccxt
 import pandas as pd
 import numpy as np
 from scipy import stats
-from config_4h import PARAMS_4H
+from config_4h import PARAMS_4H, PARAMS_4H_OBS
 
 exchange = ccxt.bitvavo()
 
@@ -90,3 +90,20 @@ for simbolo, params in PARAMS_4H.items():
 print(f"\n{'='*60}")
 print("  Walk-forward 4h completado")
 print("=" * 60)
+
+
+print("\n" + "="*60)
+print("  ACTIVOS EN OBSERVACIÓN — Walk-forward con datos frescos")
+print("="*60)
+for simbolo, params in PARAMS_4H_OBS.items():
+    try:
+        resultado = walk_forward(simbolo, params)
+        print(f"\n{'─'*60}")
+        print(f"  {simbolo}")
+        for fase, ops in resultado.items():
+            if ops:
+                sharpe = np.mean(ops) / np.std(ops) * np.sqrt(len(ops)) if np.std(ops) > 0 else 0
+                wr = sum(1 for r in ops if r > 0) / len(ops) * 100
+                print(f"  {fase.upper()}: Sharpe {sharpe:.2f} | Win rate {wr:.1f}% | {len(ops)} ops")
+    except Exception as e:
+        print(f"  {simbolo}: ERROR — {e}")
