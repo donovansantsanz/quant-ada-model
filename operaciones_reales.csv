@@ -20,5 +20,6 @@ fecha_entrada,activo,sistema,precio_entrada,cantidad,capital_usdc,stop_loss,take
 2026-09-10 00:00,BNB/EUR,4h,621.04,0.1609,100.0,622.2,683.793,10.0%,621.63,-9.5,,,2026-09-11 18:06,622.2,0.19,stop_loss,Stop en verde ejecutado por OCO,bitvavo,,,,,,,
 2026-09-10 00:00,AVAX/EUR,4h,6.7011,7.4585,50.0,6.5697,7.2401,5.0%,6.7038,-4.0,,,2026-09-11 16:52,6.5643,-2.04,stop_loss,Stop ejecutado por OCO,bitvavo,,,,,,,
 2026-09-12 00:00,AVAX/EUR,4h,6.4353,7.7759,50.0,6.3015,6.9445,5.0%,6.4301,8.1,,,2026-09-13 09:33,6.2981,-2.13,stop_loss,Stop ejecutado por OCO,bitvavo,,,,,,,
-2026-09-13 13:00,AVAX/EUR,,6.3193,7.9143,,,,,,,,,,,,,OCO colocado 14-09 12:19,,,50.0,,,,6.19,6.82
-2026-09-14 01:00,BNB/EUR,,618.37,0.1619,,,,,,,,,,,,,OCO colocado 14-09 12:18,,,100.0,,,,605.47,679.71
+2026-09-13 13:00,AVAX/EUR,,6.3193,7.9143,,,,,,,,,2026-09-15 19:45,6.2962,-0.37,stop_loss,Stop ejecutado por OCO — rally posterior +56%,,,50.0,,,,6.19,6.82
+2026-09-14 01:00,BNB/EUR,,618.37,0.1619,,,,,,,,,2026-09-21 01:46,679.86,9.94,take_profit,Take profit ejecutado por OCO,,,100.0,,,,605.47,679.71
+2026-09-23 21:00,BNB/EUR,,674.9,0.14817009,,,,,,,,,,,,,OCO colocado 23-09 21:00,,,100.25,,,,661.206,742.17
