@@ -22,4 +22,5 @@ fecha_entrada,activo,sistema,precio_entrada,cantidad,capital_usdc,stop_loss,take
 2026-09-12 00:00,AVAX/EUR,4h,6.4353,7.7759,50.0,6.3015,6.9445,5.0%,6.4301,8.1,,,2026-09-13 09:33,6.2981,-2.13,stop_loss,Stop ejecutado por OCO,bitvavo,,,,,,,
 2026-09-13 13:00,AVAX/EUR,,6.3193,7.9143,,,,,,,,,2026-09-15 19:45,6.2962,-0.37,stop_loss,Stop ejecutado por OCO — rally posterior +56%,,,50.0,,,,6.19,6.82
 2026-09-14 01:00,BNB/EUR,,618.37,0.1619,,,,,,,,,2026-09-21 01:46,679.86,9.94,take_profit,Take profit ejecutado por OCO,,,100.0,,,,605.47,679.71
-2026-09-23 21:00,BNB/EUR,,674.9,0.14817009,,,,,,,,,,,,,OCO colocado 23-09 21:00,,,100.25,,,,661.206,742.17
+2026-09-23 21:00,BNB/EUR,,674.9,0.14817009,,,,,,,,,,,,,OCO colocado 23-09 21:00,,,100.25,,,,683.79,742.17
+2026-10-06 20:00,ETH/EUR,4h,2391.1,0.0418,100.0,2367.5652,2511.054,10.0%,2391.48,-1.6,,,2026-10-08 07:45,2286.16,-4.39,stop_loss,Stop no colocado en Bitvavo — cerrado manualmente al superar nivel stop,bitvavo,,,,,,,

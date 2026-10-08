@@ -30,7 +30,7 @@ def sharpe_real(retornos):
         return float('nan')
     return retornos.mean() / retornos.std()
 
-activos_orden = ['BNB/EUR', 'AVAX/EUR', 'BNB/USDT', 'ADA/USDT', 'BTC/USDT', 'ETH/USDT']
+activos_orden = sorted(cerradas["activo"].unique(), key=lambda x: (-len(cerradas[cerradas["activo"]==x]), x))
 
 for activo in activos_orden:
     ops = cerradas[cerradas['activo'] == activo]
